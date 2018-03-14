@@ -13,6 +13,10 @@ config_version=3
 config/name="Taleweaver"
 config/icon="res://icon.png"
 
+[autoload]
+
+PartyDB="*res://system/party_db.gd"
+
 [rendering]
 
 environment/default_environment="res://default_env.tres"
