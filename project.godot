@@ -17,6 +17,8 @@ config/icon="res://icon.png"
 [autoload]
 
 PartyDB="*res://system/party_db.gd"
+ItemDB="*res://system/item_db.gd"
+G="*res://system/defs.gd"
 
 [rendering]
 

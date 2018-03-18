@@ -11,6 +11,7 @@ func load_item(name, count=1):
 	var ItemClass = load("res://world/items/" + name + ".gd")
 	while count > 0:
 		var new_item = ItemClass.new()
+		assert(new_item is G.Item)
 		new_item.source = name
 		if new_item.stackable:
 			new_item.count = count
@@ -35,6 +36,7 @@ func remove_item(name, count=1):
 				break
 
 func push_item(item):
+	assert(item is G.Item)
 	if item.stackable:
 		for child in ItemDB.get_children():
 			if child.source == item.source:
