@@ -33,14 +33,15 @@ func push_item(item):
 	else:
 		items[item.source] = item
 
-func pop_item(item, count=1):
-	assert(item is G.Item)
-	assert(item.source in items)
+func pop_item(name, count=1):
+	if not name in items:
+		return null
+	var item = items[name]
 	if item.count <= count:
-		items.erase(item.source)
+		items.erase(name)
 		return item
-	var new_item = get_script().new()
-	new_item.source = item.source
+	var new_item = item.get_script().new()
+	new_item.source = name
 	new_item.count = count
 	item.count -= count
 	return new_item
