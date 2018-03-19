@@ -1,56 +1,46 @@
 extends Node
 
+var items = {}
+
 func load_item(name, count=1):
-	for child in get_children():
-		if child.source == name:
-			if not child.stackable:
-				break
-			child.count += count
-			return [child]
-	var list = []
+	if name in items:
+		items[name].count += count
+		return items[name]
 	var ItemClass = load("res://world/items/" + name + ".gd")
-	while count > 0:
-		var new_item = ItemClass.new()
-		assert(new_item is G.Item)
-		new_item.source = name
-		if new_item.stackable:
-			new_item.count = count
-		count -= new_item.count
-		list.append(new_item)
-		add_child(new_item)
-	return list
+	assert(ItemClass is Script)
+	var new_item = ItemClass.new()
+	assert(new_item is G.Item)
+	new_item.source = name
+	new_item.count = count
+	items[name] = new_item
+	return new_item
 
 func remove_item(name, count=1):
-	for child in get_children():
-		if child.source == name:
-			if child.stackable:
-				child.count -= count
-				if child.count <= 0:
-					remove_child(child)
-					child.queue_free()
-				return
-			remove_child(child)
-			child.queue_free()
-			count -= 1
-			if count == 0:
-				break
+	if not name in items:
+		return
+	if items[name].count > count:
+		items[name].count -= count
+	else:
+		items[name].queue_free()
+		items.erase(name)
 
 func push_item(item):
 	assert(item is G.Item)
-	if item.stackable:
-		for child in ItemDB.get_children():
-			if child.source == item.source:
-				child.count += item.count
-				item.queue_free()
-				return
-	add_child(item)
+	assert(not item.is_inside_tree())
+	if item.source in items:
+		items[item.source].count += item.count
+		item.queue_free()
+	else:
+		items[item.source] = item
 
-func pop_item(item):
-	assert(item.parent == self)
-	if item.count == 1:
-		remove_child(item)
+func pop_item(item, count=1):
+	assert(item is G.Item)
+	assert(item.source in items)
+	if item.count <= count:
+		items.erase(item.source)
 		return item
 	var new_item = get_script().new()
 	new_item.source = item.source
-	item.count -= 1
+	new_item.count = count
+	item.count -= count
 	return new_item
