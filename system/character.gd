@@ -18,39 +18,36 @@ func _init():
 		stats[s] = Stat.new()
 
 func apply_mods(add, mult):
-	if add != null:
-		for s in add:
-			assert(s in stats)
-			stats[s].add += add[s]
-	if mult != null:
-		for s in mult:
-			assert(s in stats)
-			stats[s].mult += mult[s] - 1
+	for s in add:
+		assert(s in stats)
+		stats[s].add += add[s]
+	for s in mult:
+		assert(s in stats)
+		stats[s].mult += mult[s] - 1
 
 func remove_mods(add, mult):
-	if add != null:
-		for s in add:
-			assert(s in stats)
-			stats[s].add -= add[s]
-	if mult != null:
-		for s in mult:
-			assert(s in stats)
-			stats[s].mult -= mult[s] - 1
+	for s in add:
+		assert(s in stats)
+		stats[s].add -= add[s]
+	for s in mult:
+		assert(s in stats)
+		stats[s].mult -= mult[s] - 1
 
 func equip(slot, item):
 	if slot in equip:
 		var old_item = equip[slot]
-		remove_child(old_item)
 		equip.erase(slot)
+		remove_mods(old_item.mod_add, old_item.mod_mult)
+		old_item.on_unequip()
 		ItemDB.push_item(old_item)
 	if item == null:
 		return
 	assert(item is G.Equip)
-	assert(slot in item.types)
-	if slot == G.EQUIP_PRIMARY and item.two_handed:
+	if slot == G.EQUIP_WEAPON and item.two_handed:
 		equip(G.EQUIP_OFFHAND, null)
-	if slot == G.EQUIP_OFFHAND and G.EQUIP_PRIMARY in equip:
-		if equip[G.EQUIP_PRIMARY].two_handed:
-			equip(G.EQUIP_PRIMARY, null)
+	if slot == G.EQUIP_OFFHAND and G.EQUIP_WEAPON in equip:
+		if equip[G.EQUIP_WEAPON].two_handed:
+			equip(G.EQUIP_WEAPON, null)
 	equip[slot] = item
-	add_child(item)
+	apply_mods(item.mod_add, item.mod_mult)
+	item.on_equip()
