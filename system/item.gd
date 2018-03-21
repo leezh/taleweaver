@@ -1,7 +1,5 @@
 extends Object
 
-var count = 1
-var source
 var name = ""
 var description = ""
 var use_in_battle = false

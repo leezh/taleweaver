@@ -1,4 +1,4 @@
-extends "res://system/equip.gd"
+extends "res://system/equipment.gd"
 
 func _init():
 	type = G.EQUIP_WEAPON

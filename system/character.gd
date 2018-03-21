@@ -11,7 +11,7 @@ class Stat:
 var stats = {}
 var hp = 0
 var sp = 0
-var equip = {}
+var equipment = {}
 
 func _init():
 	for s in range(G.STAT_NAMES.size()):
@@ -34,20 +34,13 @@ func remove_mods(add, mult):
 		stats[s].mult -= mult[s] - 1
 
 func equip(slot, item):
-	if slot in equip:
-		var old_item = equip[slot]
-		equip.erase(slot)
-		remove_mods(old_item.mod_add, old_item.mod_mult)
-		old_item.on_unequip()
-		ItemDB.push_item(old_item)
+	if slot in equipment:
+		var current = equipment[slot]
+		equipment.erase(slot)
+		G.item(current).on_unequip(self, slot)
+		get_parent().add_item(current)
 	if item == null:
 		return
-	assert(item is G.Equip)
-	if slot == G.EQUIP_WEAPON and item.two_handed:
-		equip(G.EQUIP_OFFHAND, null)
-	if slot == G.EQUIP_OFFHAND and G.EQUIP_WEAPON in equip:
-		if equip[G.EQUIP_WEAPON].two_handed:
-			equip(G.EQUIP_WEAPON, null)
-	equip[slot] = item
-	apply_mods(item.mod_add, item.mod_mult)
-	item.on_equip()
+	assert(G.item(item) is G.Equipment)
+	equipment[slot] = item
+	G.item(item).on_equip(self, slot)
