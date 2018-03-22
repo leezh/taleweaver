@@ -2,6 +2,7 @@ extends Node
 
 var party = {}
 var inventory = {}
+var inventory_sort = []
 
 func add_character(name):
 	if has_node(name):
@@ -36,6 +37,7 @@ func add_item(name, count=1):
 	else:
 		G.item(name)
 		inventory[name] = count
+		inventory_sort.append(name)
 
 func remove_item(name, count=1):
 	if name in inventory:
@@ -43,3 +45,4 @@ func remove_item(name, count=1):
 			inventory[name] -= count
 		else:
 			inventory.erase(name)
+			inventory_sort.erase(name)
