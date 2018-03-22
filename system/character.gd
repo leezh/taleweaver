@@ -8,10 +8,11 @@ class Stat:
 	func get_value():
 		return (base + add) * mult
 
+export(String) var display_name = ""
+export(int) var position = -1
 var stats = {}
 var hp = 0
 var sp = 0
-var position = -1
 var equipment = {}
 
 func _init():
