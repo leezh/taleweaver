@@ -11,9 +11,4 @@ func _ready():
 			continue
 		add_item(line)
 	for index in range(get_child_count()):
-		if child.position >= 0 and not child.position in party:
-			set_party_member(child.position, child)
-		elif not index in party:
-			set_party_member(index, child)
-		else:
-			set_party_member(-1, child)
+		set_party_member(index, get_child(index))

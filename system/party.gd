@@ -4,17 +4,6 @@ var party = {}
 var inventory = {}
 var inventory_sort = []
 
-func add_character(name):
-	if has_node(name):
-		return get_node(name)
-	var Class = load("res://world/characters/" + name + ".gd")
-	assert(Class is Script)
-	var new_char = Class.new()
-	assert(new_char is G.Character)
-	new_char.name = name
-	add_child(new_char)
-	return new_char
-
 func set_party_member(index, character):
 	if index > 0 and index in party:
 		party[index].position = -1
