@@ -34,14 +34,15 @@ func remove_mods(add, mult):
 		assert(s in stats)
 		stats[s].mult -= mult[s] - 1
 
-func equip(slot, item):
+func equip(slot, item, put_back=true):
 	if slot in equipment:
 		var current = equipment[slot]
 		equipment.erase(slot)
-		G.item(current).on_unequip(self, slot)
-		get_parent().add_item(current)
+		G.item(current).on_unequip(self, slot, put_back)
+		if put_back:
+			get_parent().add_item(current)
 	if item == null:
 		return
 	assert(G.item(item) is G.Equipment)
 	equipment[slot] = item
-	G.item(item).on_equip(self, slot)
+	G.item(item).on_equip(self, slot, put_back)
