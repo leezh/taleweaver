@@ -31,6 +31,13 @@ func set_party_member(index, character):
 	party[index] = character
 	character.position = index
 
+func get_random_member():
+	var list = []
+	for index in party:
+		if party[index].hp > 0:
+			list.append(index)
+	return list[rand_range(0, list.size())]
+
 func add_item(name, count=1):
 	if name in inventory:
 		inventory[name] += count
