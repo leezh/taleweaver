@@ -11,6 +11,7 @@ class Stat:
 var stats = {}
 var hp = 0
 var sp = 0
+var position = -1
 var equipment = {}
 
 func _init():
