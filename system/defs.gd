@@ -20,15 +20,3 @@ const EQUIP_ARMOUR = 2
 const EQUIP_ACCESSORY = 3
 
 const EQUIP_SLOTS = ["weapon", "offhand", "armour", "accessory"]
-
-var _items = {}
-
-func item(name):
-	if name in _items:
-		return _items[name]
-	var Class = load("res://world/items/" + name + ".gd")
-	assert(Class is Script)
-	var new_item = Class.new()
-	assert(new_item is Item)
-	_items[name] = new_item
-	return new_item

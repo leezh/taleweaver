@@ -14,8 +14,8 @@ class Stat:
 var display_name = ""
 var player_enabled = false
 var portrait = null
-var item_db
 var battle_actor = ""
+var equip_db
 var stats = {}
 var hp = 0
 var sp = 0
@@ -105,9 +105,9 @@ func _set(property, value):
 				equip(e, value, false)
 
 func _ready():
-	item_db = get_tree().root.get_node("G")
+	equip_db = get_node("/root/EquipDB")
 	for slot in equipment:
-		item_db.item(equipment[slot]).on_equip(self, slot, false)
+		equip_db.get_node(equipment[slot]).on_equip(self, slot, false)
 
 func apply_mods(add, mult):
 	for s in add:
@@ -129,10 +129,10 @@ func equip(slot, item, put_back=true):
 	if slot in equipment:
 		var current = equipment[slot]
 		equipment.erase(slot)
-		item_db.item(current).on_unequip(self, slot, put_back)
+		equip_db.get_node(current).on_unequip(self, slot, put_back)
 		if put_back:
-			get_parent().add_item(current)
-	if not item or not item_db.item(item) is G.Equipment:
+			get_parent().add_equipment(current)
+	if not item or not equip_db.has_node(item):
 		return
 	equipment[slot] = item
-	item_db.item(item).on_equip(self, slot, put_back)
+	equip_db.get_node(item).on_equip(self, slot, put_back)

@@ -3,6 +3,8 @@ extends Node
 var party = {}
 var inventory = {}
 var inventory_sort = []
+var equipment = {}
+var equipment_sort = []
 
 func set_party_member(index, character):
 	if index > 0 and index in party:
@@ -31,7 +33,6 @@ func add_item(name, count=1):
 	if name in inventory:
 		inventory[name] += count
 	else:
-		G.item(name)
 		inventory[name] = count
 		inventory_sort.append(name)
 
@@ -42,3 +43,18 @@ func remove_item(name, count=1):
 		else:
 			inventory.erase(name)
 			inventory_sort.erase(name)
+
+func add_equipment(name, count=1):
+	if name in equipment:
+		equipment[name] += count
+	else:
+		equipment[name] = count
+		equipment_sort.append(name)
+
+func remove_equipment(name, count=1):
+	if name in equipment:
+		if equipment[name] > count:
+			equipment[name] -= count
+		else:
+			equipment.erase(name)
+			equipment_sort.erase(name)

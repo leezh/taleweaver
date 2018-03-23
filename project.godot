@@ -18,6 +18,8 @@ config/icon="res://icon.png"
 
 G="*res://system/defs.gd"
 PlayerParty="*res://world/player_party.tscn"
+EquipDB="*res://world/equip_db.tscn"
+ItemDB="*res://world/item_db.tscn"
 
 [rendering]
 

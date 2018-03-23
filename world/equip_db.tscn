@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://system/equipment.gd" type="Script" id=1]
+
+[node name="EquipDB" type="Node" index="0"]
+
+[node name="basic_blaster" type="Node" parent="." index="0"]
+
+script = ExtResource( 1 )
+_sections_unfolded = [ "add" ]
+display_name = "Basic Blaster"
+description = ""
+two_handed = true
+add/p_attack = 20
+
+
