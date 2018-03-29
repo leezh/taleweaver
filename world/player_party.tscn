@@ -12,7 +12,19 @@ script = ExtResource( 1 )
 script = ExtResource( 2 )
 _sections_unfolded = [ "base", "equip" ]
 display_name = "Godette"
+player_enabled = false
+portrait = null
+battle_actor = ""
 base/max_hp = 100
+base/max_sp = 0
+base/p_attack = 0
+base/p_defence = 0
+base/m_attack = 0
+base/m_defence = 0
+base/speed = 0
 equip/weapon = "basic_blaster"
+equip/offhand = ""
+equip/armour = ""
+equip/accessory = ""
 
 

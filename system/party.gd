@@ -22,6 +22,9 @@ func set_party_member(index, character):
 	party[index] = character
 	character.position = index
 
+func get_members():
+	return party.values()
+
 func get_random_member():
 	var list = []
 	for index in party:

@@ -8,8 +8,10 @@
 
 script = ExtResource( 1 )
 _sections_unfolded = [ "add" ]
-display_name = "Basic Blaster"
-description = ""
+icon = null
+battle_model = ""
+type = null
+light_weapon = false
 two_handed = true
 add/p_attack = 20
 

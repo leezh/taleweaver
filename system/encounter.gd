@@ -6,9 +6,11 @@ export(String, MULTILINE) var inventory_list = ""
 
 func _ready():
 	for line in inventory_list.split("/n"):
-		line = line.strip()
+		line = line.strip_edges()
 		if line.empty() or line.begins_with("#"):
 			continue
 		add_item(line)
-	for index in range(get_child_count()):
-		set_party_member(index, get_child(index))
+	var index = 0
+	for child in get_children():
+		set_party_member(index, child)
+		index += 1
