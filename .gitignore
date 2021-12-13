@@ -1,4 +1,7 @@
 /build/
+/.vscode/
+!/.vscode/launch.json
+!/.vscode/tasks.json
 
 *~
 .directory

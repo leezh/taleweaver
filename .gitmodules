@@ -1,0 +1,10 @@
+[submodule "glad"]
+	path = extlib/glad
+	url = https://github.com/Dav1dde/glad.git
+	branch = glad2
+[submodule "linmath"]
+	path = extlib/linmath
+	url = https://github.com/datenwolf/linmath.h
+[submodule "sdl"]
+	path = extlib/sdl
+	url = https://github.com/libsdl-org/SDL.git
