@@ -1,0 +1,4 @@
+#ifndef TALEWEAVER_RENDER_H
+#define TALEWEAVER_RENDER_H
+
+#endif
