@@ -25,8 +25,6 @@ int main(int argc, const char *argv[]) {
 
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     context = SDL_GL_CreateContext(window);
     if (!context) {
         SDL_LogError(0, "%s", SDL_GetError());

@@ -6,7 +6,7 @@ add_executable(${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PRIVATE "extlib/linmath")
 
 add_subdirectory("extlib/glad/cmake" glad_cmake)
-glad_add_library(glad REPRODUCIBLE API gl:core=4.3)
+glad_add_library(glad REPRODUCIBLE API gl:core=3.3)
 target_link_libraries(${PROJECT_NAME} glad)
 
 set(SDL_STATIC ON CACHE BOOL "" FORCE)

@@ -15,6 +15,7 @@ static GLint renderLocOffset;
 static GLint renderLocSize;
 static GLint renderLocTexOffset;
 static GLint renderLocTexSize;
+static GLint renderLocTex;
 static GLint renderLocColor;
 
 static const GLfloat renderVertices[] = {
@@ -27,6 +28,15 @@ static const GLfloat renderVertices[] = {
 };
 static GLuint renderVBO = 0;
 static GLuint renderVAO = 0;
+
+static const GLubyte renderBlankPixels[] = {
+    0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff,
+};
+static GLuint renderBlankTex = 0;
 
 void renderInit() {
     glGenVertexArrays(1, &renderVAO);
@@ -65,13 +75,21 @@ void renderInit() {
     renderLocSize = glGetUniformLocation(renderProgram, "size");
     renderLocTexOffset = glGetUniformLocation(renderProgram, "texOffset");
     renderLocTexSize = glGetUniformLocation(renderProgram, "texSize");
+    renderLocTex = glGetUniformLocation(renderProgram, "tex");
     renderLocColor = glGetUniformLocation(renderProgram, "color");
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(renderLocPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glGenTextures(1, &renderBlankTex);
+    glBindTexture(GL_TEXTURE_2D, renderBlankTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, renderBlankPixels);
 }
 
 void renderQuit() {
+    glDeleteTextures(1, &renderBlankTex);
     glDeleteProgram(renderProgram);
+    glDeleteBuffers(1, &renderVBO);
+    glDeleteVertexArrays(1, &renderVAO);
 }
 
 void renderInitGlyph(RenderGlyph *glyph) {
@@ -80,10 +98,10 @@ void renderInitGlyph(RenderGlyph *glyph) {
     glyph->w = 0;
     glyph->h = 0;
     glyph->tex = 0;
-    glyph->tex_x = 0;
-    glyph->tex_y = 0;
-    glyph->tex_w = 0;
-    glyph->tex_h = 0;
+    glyph->tex_x = 0.f;
+    glyph->tex_y = 0.f;
+    glyph->tex_w = 1.f;
+    glyph->tex_h = 1.f;
     glyph->r = 1.f;
     glyph->g = 1.f;
     glyph->b = 1.f;
@@ -93,9 +111,16 @@ void renderInitGlyph(RenderGlyph *glyph) {
 void renderPrepare(int width, int height) {
     glUseProgram(renderProgram);
     glUniform2f(renderLocResolution, width, height);
+    glUniform1i(renderLocTex, 0);
 }
 
 void renderGlyph(RenderGlyph *glyph) {
+    glActiveTexture(GL_TEXTURE0);
+    if (glyph->tex) {
+        glBindTexture(GL_TEXTURE_2D, glyph->tex);
+    } else {
+        glBindTexture(GL_TEXTURE_2D, renderBlankTex);
+    }
     glUniform2f(renderLocOffset, glyph->x, glyph->y);
     glUniform2f(renderLocSize, glyph->w, glyph->h);
     glUniform2f(renderLocTexOffset, glyph->tex_x, glyph->tex_y);
