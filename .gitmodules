@@ -8,3 +8,6 @@
 [submodule "sdl"]
 	path = extlib/sdl
 	url = https://github.com/libsdl-org/SDL.git
+[submodule "stb"]
+	path = extlib/stb
+	url = https://github.com/nothings/stb.git

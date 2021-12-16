@@ -4,6 +4,7 @@ project(taleweaver C)
 add_executable(${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "extlib/linmath")
+target_include_directories(${PROJECT_NAME} PRIVATE "extlib/stb")
 
 add_subdirectory("extlib/glad/cmake" glad_cmake)
 glad_add_library(glad REPRODUCIBLE API gl:core=3.3)
@@ -21,6 +22,8 @@ target_sources(${PROJECT_NAME} PRIVATE
   src/render.c
   src/shader.h
   src/shader.c
+  src/textures.h
+  src/textures.c
 )
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/resource")
