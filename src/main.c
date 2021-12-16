@@ -39,6 +39,13 @@ int main(int argc, const char *argv[]) {
 
     renderInit();
 
+    RenderGlyph square;
+    renderInitGlyph(&square);
+    square.x = 10;
+    square.y = 10;
+    square.w = 100;
+    square.h = 100;
+
     Uint64 elapsedTicks = SDL_GetTicks64();
     while (running) {
         SDL_Event event;
@@ -63,8 +70,11 @@ int main(int argc, const char *argv[]) {
 
         int width, height;
         SDL_GL_GetDrawableSize(window, &width, &height);
+        renderPrepare(width, height);
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        renderGlyph(&square);
 
         SDL_GL_SwapWindow(window);
     }

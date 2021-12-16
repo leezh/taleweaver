@@ -1,24 +1,17 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL_log.h>
 #include "shader.h"
 
-GLuint shaderCompileVF(const GLchar *vertex, const GLchar *fragment) {
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertex, 0);
-    glCompileShader(vertexShader);
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragment, 0);
-    glCompileShader(fragmentShader);
-
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-    glLinkProgram(program);
-
-    glDetachShader(program, vertexShader);
-    glDetachShader(program, fragmentShader);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    return program;
+void checkShader(GLuint shader) {
+    GLint status;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+    if (status != GL_TRUE) {
+        GLsizei length;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+        GLchar *log = malloc(length + 1);
+        log[length] = '\0';
+        glGetShaderInfoLog(shader, length, &length, log);
+        SDL_LogError(0, "%s", log);
+    }
 }

@@ -3,6 +3,6 @@
 
 #include <glad/gl.h>
 
-GLuint shaderCompileVF(const GLchar *vertex, const GLchar *fragment);
+void checkShader(GLuint shader);
 
 #endif

@@ -27,7 +27,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/resource")
 include(resource)
 add_resource(res
   CSTR
-    shaders/render_flat.vert
-    shaders/render_flat.frag
+    shaders/render.vert
+    shaders/render.frag
 )
 target_link_libraries(${PROJECT_NAME} res)
