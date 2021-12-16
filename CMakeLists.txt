@@ -19,6 +19,8 @@ target_sources(${PROJECT_NAME} PRIVATE
   src/main.c
   src/render.h
   src/render.c
+  src/shader.h
+  src/shader.c
 )
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/resource")

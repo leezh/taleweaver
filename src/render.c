@@ -1,11 +1,19 @@
-#include <stdio.h>
-#include <glad/gl.h>
 #include "render.h"
+#include "shader.h"
 
-#define SOURCE_NUM 2
-
-static const GLchar *shaderSources[SOURCE_NUM] = {
+static GLuint renderFlatProgram = 0;
+static const GLchar renderFlatVertex[] = {
 #include "shaders/render_flat.vert.cstr"
+};
+static const GLchar renderFlatFragment[] = {
 #include "shaders/render_flat.frag.cstr"
 };
-static GLuint shaderIds[SOURCE_NUM];
+
+
+void renderInit() {
+    renderFlatProgram = shaderCompileVF(renderFlatVertex, renderFlatFragment);
+}
+
+void renderQuit() {
+    glDeleteProgram(renderFlatProgram);
+}

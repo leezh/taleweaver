@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <glad/gl.h>
 #include "main.h"
+#include "render.h"
 
 SDL_Window *window = NULL;
 SDL_GLContext context = NULL;
@@ -36,6 +37,8 @@ int main(int argc, const char *argv[]) {
 
     gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
 
+    renderInit();
+
     Uint64 elapsedTicks = SDL_GetTicks64();
     while (running) {
         SDL_Event event;
@@ -65,6 +68,8 @@ int main(int argc, const char *argv[]) {
 
         SDL_GL_SwapWindow(window);
     }
+
+    renderQuit();
 
     SDL_Quit();
     return 0;
