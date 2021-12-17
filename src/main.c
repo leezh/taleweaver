@@ -39,8 +39,6 @@ int main(int argc, const char *argv[]) {
 
     RenderGlyph square;
     renderInitGlyph(&square);
-    square.x = 10;
-    square.y = 10;
     square.w = 100;
     square.h = 100;
 
@@ -72,7 +70,7 @@ int main(int argc, const char *argv[]) {
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderGlyph(&square);
+        renderGlyph(&square, (width - square.w) / 2, (height - square.h) / 2);
 
         SDL_GL_SwapWindow(window);
     }

@@ -14,7 +14,6 @@ static GLint renderLocResolution;
 static GLint renderLocOffset;
 static GLint renderLocSize;
 static GLint renderLocTexOffset;
-static GLint renderLocTexSize;
 static GLint renderLocTex;
 static GLint renderLocColor;
 
@@ -69,7 +68,6 @@ void renderInit() {
     renderLocOffset = glGetUniformLocation(renderProgram, "offset");
     renderLocSize = glGetUniformLocation(renderProgram, "size");
     renderLocTexOffset = glGetUniformLocation(renderProgram, "texOffset");
-    renderLocTexSize = glGetUniformLocation(renderProgram, "texSize");
     renderLocTex = glGetUniformLocation(renderProgram, "tex");
     renderLocColor = glGetUniformLocation(renderProgram, "color");
     glEnableVertexAttribArray(0);
@@ -88,15 +86,11 @@ void renderQuit() {
 }
 
 void renderInitGlyph(RenderGlyph *glyph) {
-    glyph->x = 0;
-    glyph->y = 0;
-    glyph->w = 0;
-    glyph->h = 0;
     glyph->tex = 0;
+    glyph->w = 0.f;
+    glyph->h = 0.f;
     glyph->tex_x = 0.f;
     glyph->tex_y = 0.f;
-    glyph->tex_w = 1.f;
-    glyph->tex_h = 1.f;
     glyph->r = 1.f;
     glyph->g = 1.f;
     glyph->b = 1.f;
@@ -110,17 +104,30 @@ void renderPrepare(int width, int height) {
     glUniform1i(renderLocTex, 0);
 }
 
-void renderGlyph(RenderGlyph *glyph) {
+void renderGlyph(RenderGlyph *glyph, float x, float y) {
     glActiveTexture(GL_TEXTURE0);
     if (glyph->tex) {
         glBindTexture(GL_TEXTURE_RECTANGLE, glyph->tex);
     } else {
         glBindTexture(GL_TEXTURE_RECTANGLE, renderBlankTex);
     }
-    glUniform2f(renderLocOffset, glyph->x, glyph->y);
+    glUniform2f(renderLocOffset, x, y);
     glUniform2f(renderLocSize, glyph->w, glyph->h);
     glUniform2f(renderLocTexOffset, glyph->tex_x, glyph->tex_y);
-    glUniform2f(renderLocTexSize, glyph->tex_w, glyph->tex_h);
+    glUniform4f(renderLocColor, glyph->r, glyph->g, glyph->b, glyph->a);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void renderGlyphCropped(RenderGlyph *glyph, float x, float y, float left, float top, float right, float bottom) {
+    glActiveTexture(GL_TEXTURE0);
+    if (glyph->tex) {
+        glBindTexture(GL_TEXTURE_RECTANGLE, glyph->tex);
+    } else {
+        glBindTexture(GL_TEXTURE_RECTANGLE, renderBlankTex);
+    }
+    glUniform2f(renderLocOffset, x, y);
+    glUniform2f(renderLocSize, glyph->w - left - right, glyph->h - top - bottom);
+    glUniform2f(renderLocTexOffset, glyph->tex_x + left, glyph->tex_y + top);
     glUniform4f(renderLocColor, glyph->r, glyph->g, glyph->b, glyph->a);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
