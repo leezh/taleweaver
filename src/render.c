@@ -76,10 +76,8 @@ void renderInit() {
     glVertexAttribPointer(renderLocPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
     glGenTextures(1, &renderBlankTex);
-    glBindTexture(GL_TEXTURE_2D, renderBlankTex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, renderBlankPixels);
+    glBindTexture(GL_TEXTURE_RECTANGLE, renderBlankTex);
+    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, renderBlankPixels);
 }
 
 void renderQuit() {
@@ -115,9 +113,9 @@ void renderPrepare(int width, int height) {
 void renderGlyph(RenderGlyph *glyph) {
     glActiveTexture(GL_TEXTURE0);
     if (glyph->tex) {
-        glBindTexture(GL_TEXTURE_2D, glyph->tex);
+        glBindTexture(GL_TEXTURE_RECTANGLE, glyph->tex);
     } else {
-        glBindTexture(GL_TEXTURE_2D, renderBlankTex);
+        glBindTexture(GL_TEXTURE_RECTANGLE, renderBlankTex);
     }
     glUniform2f(renderLocOffset, glyph->x, glyph->y);
     glUniform2f(renderLocSize, glyph->w, glyph->h);
