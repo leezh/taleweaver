@@ -3,6 +3,7 @@
 
 #include <glad/gl.h>
 
-void checkShader(GLuint shader);
+int compileShader(GLuint shader, const GLchar *source);
+int linkProgram(GLuint program);
 
 #endif

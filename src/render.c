@@ -2,10 +2,10 @@
 #include "shader.h"
 
 static GLuint renderProgram = 0;
-static const GLchar *renderVertex = {
+static const GLchar renderVertex[] = {
 #include "shaders/render.vert.cstr"
 };
-static const GLchar *renderFragment = {
+static const GLchar renderFragment[] = {
 #include "shaders/render.frag.cstr"
 };
 
@@ -34,7 +34,6 @@ static const GLubyte renderBlankPixels[] = {
     0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff,
 };
 static GLuint renderBlankTex = 0;
 
@@ -47,20 +46,16 @@ void renderInit() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(renderVertices), renderVertices, GL_STATIC_DRAW);
     
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &renderVertex, 0);
-    glCompileShader(vertexShader);
-    checkShader(vertexShader);
+    compileShader(vertexShader, renderVertex);
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &renderFragment, 0);
-    glCompileShader(fragmentShader);
-    checkShader(fragmentShader);
+    compileShader(fragmentShader, renderFragment);
 
     renderProgram = glCreateProgram();
     glAttachShader(renderProgram, vertexShader);
     glAttachShader(renderProgram, fragmentShader);
     glBindFragDataLocation(renderProgram, 0, "outColor");
-    glLinkProgram(renderProgram);
+    linkProgram(renderProgram);
 
     glDetachShader(renderProgram, vertexShader);
     glDetachShader(renderProgram, fragmentShader);
@@ -82,6 +77,8 @@ void renderInit() {
 
     glGenTextures(1, &renderBlankTex);
     glBindTexture(GL_TEXTURE_2D, renderBlankTex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, renderBlankPixels);
 }
 
@@ -110,6 +107,7 @@ void renderInitGlyph(RenderGlyph *glyph) {
 
 void renderPrepare(int width, int height) {
     glUseProgram(renderProgram);
+    glBindVertexArray(renderVAO);
     glUniform2f(renderLocResolution, width, height);
     glUniform1i(renderLocTex, 0);
 }
