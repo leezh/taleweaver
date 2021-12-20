@@ -1,23 +1,23 @@
 #include "render.h"
 #include "shader.h"
 
-static GLuint renderProgram = 0;
-static const GLchar renderVertex[] = {
+static GLuint program = 0;
+static const GLchar vertex[] = {
 #include "shaders/render.vert.cstr"
 };
-static const GLchar renderFragment[] = {
+static const GLchar fragment[] = {
 #include "shaders/render.frag.cstr"
 };
 
-static GLint renderLocPosition;
-static GLint renderLocResolution;
-static GLint renderLocOffset;
-static GLint renderLocSize;
-static GLint renderLocTexOffset;
-static GLint renderLocTex;
-static GLint renderLocColor;
+static GLint locPosition;
+static GLint locResolution;
+static GLint locOffset;
+static GLint locSize;
+static GLint locTexOffset;
+static GLint locTex;
+static GLint locColor;
 
-static const GLfloat renderVertices[] = {
+static const GLfloat vertices[] = {
     0.0f, 0.0f,
     1.0f, 0.0f,
     1.0f, 1.0f,
@@ -25,64 +25,64 @@ static const GLfloat renderVertices[] = {
     1.0f, 1.0f,
     0.0f, 1.0f,
 };
-static GLuint renderVBO = 0;
-static GLuint renderVAO = 0;
+static GLuint vbo = 0;
+static GLuint vao = 0;
 
-static const GLubyte renderBlankPixels[] = {
+static const GLubyte blankpixels[] = {
     0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff,
 };
-static GLuint renderBlankTex = 0;
+static GLuint blanktex = 0;
 
 void renderInit() {
-    glGenVertexArrays(1, &renderVAO);
-    glBindVertexArray(renderVAO);
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
-    glGenBuffers(1, &renderVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, renderVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(renderVertices), renderVertices, GL_STATIC_DRAW);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    compileShader(vertexShader, renderVertex);
+    compileShader(vertexShader, vertex);
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    compileShader(fragmentShader, renderFragment);
+    compileShader(fragmentShader, fragment);
 
-    renderProgram = glCreateProgram();
-    glAttachShader(renderProgram, vertexShader);
-    glAttachShader(renderProgram, fragmentShader);
-    glBindFragDataLocation(renderProgram, 0, "outColor");
-    linkProgram(renderProgram);
+    program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glBindFragDataLocation(program, 0, "outColor");
+    linkProgram(program);
 
-    glDetachShader(renderProgram, vertexShader);
-    glDetachShader(renderProgram, fragmentShader);
+    glDetachShader(program, vertexShader);
+    glDetachShader(program, fragmentShader);
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    glUseProgram(renderProgram);
-    renderLocPosition = glGetAttribLocation(renderProgram, "position");
-    renderLocResolution = glGetUniformLocation(renderProgram, "resolution");
-    renderLocOffset = glGetUniformLocation(renderProgram, "offset");
-    renderLocSize = glGetUniformLocation(renderProgram, "size");
-    renderLocTexOffset = glGetUniformLocation(renderProgram, "texOffset");
-    renderLocTex = glGetUniformLocation(renderProgram, "tex");
-    renderLocColor = glGetUniformLocation(renderProgram, "color");
+    glUseProgram(program);
+    locPosition = glGetAttribLocation(program, "position");
+    locResolution = glGetUniformLocation(program, "resolution");
+    locOffset = glGetUniformLocation(program, "offset");
+    locSize = glGetUniformLocation(program, "size");
+    locTexOffset = glGetUniformLocation(program, "texOffset");
+    locTex = glGetUniformLocation(program, "tex");
+    locColor = glGetUniformLocation(program, "color");
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(renderLocPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(locPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-    glGenTextures(1, &renderBlankTex);
-    glBindTexture(GL_TEXTURE_RECTANGLE, renderBlankTex);
-    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, renderBlankPixels);
+    glGenTextures(1, &blanktex);
+    glBindTexture(GL_TEXTURE_RECTANGLE, blanktex);
+    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, blankpixels);
 }
 
 void renderQuit() {
-    glDeleteTextures(1, &renderBlankTex);
-    glDeleteProgram(renderProgram);
-    glDeleteBuffers(1, &renderVBO);
-    glDeleteVertexArrays(1, &renderVAO);
+    glDeleteTextures(1, &blanktex);
+    glDeleteProgram(program);
+    glDeleteBuffers(1, &vbo);
+    glDeleteVertexArrays(1, &vao);
 }
 
 void renderInitGlyph(RenderGlyph *glyph) {
@@ -98,10 +98,10 @@ void renderInitGlyph(RenderGlyph *glyph) {
 }
 
 void renderPrepare(int width, int height) {
-    glUseProgram(renderProgram);
-    glBindVertexArray(renderVAO);
-    glUniform2f(renderLocResolution, width, height);
-    glUniform1i(renderLocTex, 0);
+    glUseProgram(program);
+    glBindVertexArray(vao);
+    glUniform2f(locResolution, width, height);
+    glUniform1i(locTex, 0);
 }
 
 void renderGlyph(RenderGlyph *glyph, float x, float y) {
@@ -109,12 +109,12 @@ void renderGlyph(RenderGlyph *glyph, float x, float y) {
     if (glyph->tex) {
         glBindTexture(GL_TEXTURE_RECTANGLE, glyph->tex);
     } else {
-        glBindTexture(GL_TEXTURE_RECTANGLE, renderBlankTex);
+        glBindTexture(GL_TEXTURE_RECTANGLE, blanktex);
     }
-    glUniform2f(renderLocOffset, x, y);
-    glUniform2f(renderLocSize, glyph->w, glyph->h);
-    glUniform2f(renderLocTexOffset, glyph->tex_x, glyph->tex_y);
-    glUniform4f(renderLocColor, glyph->r, glyph->g, glyph->b, glyph->a);
+    glUniform2f(locOffset, x, y);
+    glUniform2f(locSize, glyph->w, glyph->h);
+    glUniform2f(locTexOffset, glyph->tex_x, glyph->tex_y);
+    glUniform4f(locColor, glyph->r, glyph->g, glyph->b, glyph->a);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -123,11 +123,11 @@ void renderGlyphCropped(RenderGlyph *glyph, float x, float y, float left, float 
     if (glyph->tex) {
         glBindTexture(GL_TEXTURE_RECTANGLE, glyph->tex);
     } else {
-        glBindTexture(GL_TEXTURE_RECTANGLE, renderBlankTex);
+        glBindTexture(GL_TEXTURE_RECTANGLE, blanktex);
     }
-    glUniform2f(renderLocOffset, x, y);
-    glUniform2f(renderLocSize, glyph->w - left - right, glyph->h - top - bottom);
-    glUniform2f(renderLocTexOffset, glyph->tex_x + left, glyph->tex_y + top);
-    glUniform4f(renderLocColor, glyph->r, glyph->g, glyph->b, glyph->a);
+    glUniform2f(locOffset, x, y);
+    glUniform2f(locSize, glyph->w - left - right, glyph->h - top - bottom);
+    glUniform2f(locTexOffset, glyph->tex_x + left, glyph->tex_y + top);
+    glUniform4f(locColor, glyph->r, glyph->g, glyph->b, glyph->a);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
