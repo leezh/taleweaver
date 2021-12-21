@@ -129,24 +129,12 @@ void heightmapInit() {
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize, indices, GL_STATIC_DRAW);
-    
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    compileShader(vertexShader, vertex);
 
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    compileShader(fragmentShader, fragment);
-
-    program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-    glBindFragDataLocation(program, 0, "outColor");
-    linkProgram(program);
-
-    glDetachShader(program, vertexShader);
-    glDetachShader(program, fragmentShader);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    ShaderCompiler compiler;
+    compiler.compileStage(GL_VERTEX_SHADER, vertex);
+    compiler.compileStage(GL_FRAGMENT_SHADER, fragment);
+    compiler.bindFragmentOutput(0, "outColor");
+    program = compiler.create();
 
     glUseProgram(program);
     locPosition = glGetAttribLocation(program, "position");
