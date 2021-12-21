@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <glad/gl.h>
-#include "heightmap.h"
-#include "shader.h"
+#include "heightmap.hpp"
+#include "shader.hpp"
 
 static GLuint program = 0;
 static const GLchar vertex[] = {
@@ -36,11 +36,11 @@ void heightmapInit() {
     borderOffset = (void *)(edgeLength * edgeLength * 6 * sizeof(GLfloat));
 
     size_t pointSize = (length * length + edgeLength * 4) * 2 * sizeof(GLfloat);
-    GLfloat *points = malloc(pointSize);
+    GLfloat points[pointSize];
     GLfloat *p = points;
 
     size_t indexSize = indexCount * sizeof(GLuint);
-    GLuint *indices = malloc(indexSize);
+    GLuint indices[indexSize];
     GLuint *ci = indices;
     GLuint *i = &indices[edgeLength * edgeLength * 6];
 
@@ -129,9 +129,6 @@ void heightmapInit() {
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize, indices, GL_STATIC_DRAW);
-
-    free(points);
-    free(indices);
     
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     compileShader(vertexShader, vertex);

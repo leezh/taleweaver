@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.11)
-project(taleweaver C)
+project(taleweaver C CXX)
 
 add_executable(${PROJECT_NAME})
 
@@ -16,16 +16,16 @@ add_subdirectory("extlib/sdl")
 target_link_libraries(${PROJECT_NAME} SDL2main SDL2-static)
 
 target_sources(${PROJECT_NAME} PRIVATE
-  src/main.h
-  src/main.c
-  src/render.h
-  src/render.c
-  src/shader.h
-  src/shader.c
-  src/textures.h
-  src/textures.c
-  src/heightmap.h
-  src/heightmap.c
+  src/main.hpp
+  src/main.cpp
+  src/render.hpp
+  src/render.cpp
+  src/shader.hpp
+  src/shader.cpp
+  src/textures.hpp
+  src/textures.cpp
+  src/heightmap.hpp
+  src/heightmap.cpp
 )
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/resource")

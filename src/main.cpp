@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <glad/gl.h>
-#include "main.h"
-#include "render.h"
-#include "heightmap.h"
+#include "main.hpp"
+#include "render.hpp"
+#include "heightmap.hpp"
 
 SDL_Window *window = NULL;
 SDL_GLContext context = NULL;
