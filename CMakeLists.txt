@@ -3,7 +3,9 @@ project(taleweaver C CXX)
 
 add_executable(${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME} PRIVATE "extlib/linmath")
+add_subdirectory("extlib/glm" glm)
+target_link_libraries(${PROJECT_NAME} glm::glm)
+
 target_include_directories(${PROJECT_NAME} PRIVATE "extlib/stb")
 
 add_subdirectory("extlib/glad/cmake" glad_cmake)
