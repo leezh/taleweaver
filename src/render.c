@@ -70,7 +70,7 @@ void renderInit() {
     locTexOffset = glGetUniformLocation(program, "texOffset");
     locTex = glGetUniformLocation(program, "tex");
     locColor = glGetUniformLocation(program, "color");
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(locPosition);
     glVertexAttribPointer(locPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
     glGenTextures(1, &blanktex);

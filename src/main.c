@@ -2,6 +2,7 @@
 #include <glad/gl.h>
 #include "main.h"
 #include "render.h"
+#include "heightmap.h"
 
 SDL_Window *window = NULL;
 SDL_GLContext context = NULL;
@@ -36,11 +37,7 @@ int main(int argc, const char *argv[]) {
     gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
 
     renderInit();
-
-    RenderGlyph square;
-    renderInitGlyph(&square);
-    square.w = 100;
-    square.h = 100;
+    heightmapInit();
 
     Uint64 elapsedTicks = SDL_GetTicks64();
     while (running) {
@@ -70,11 +67,12 @@ int main(int argc, const char *argv[]) {
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderGlyph(&square, (width - square.w) / 2, (height - square.h) / 2);
+        heightmapRender();
 
         SDL_GL_SwapWindow(window);
     }
 
+    heightmapQuit();
     renderQuit();
 
     SDL_Quit();

@@ -24,6 +24,8 @@ target_sources(${PROJECT_NAME} PRIVATE
   src/shader.c
   src/textures.h
   src/textures.c
+  src/heightmap.h
+  src/heightmap.c
 )
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/resource")
@@ -32,5 +34,7 @@ add_resource(res
   CSTR
     shaders/render.vert
     shaders/render.frag
+    shaders/heightmap.vert
+    shaders/heightmap.frag
 )
 target_link_libraries(${PROJECT_NAME} res)
