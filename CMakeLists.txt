@@ -18,7 +18,8 @@ add_subdirectory("extlib/sdl")
 target_link_libraries(${PROJECT_NAME} SDL2main SDL2-static)
 
 target_sources(${PROJECT_NAME} PRIVATE
-  src/main.hpp
+  src/window.hpp
+  src/window.cpp
   src/main.cpp
   src/render.hpp
   src/render.cpp
