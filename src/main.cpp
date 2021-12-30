@@ -11,7 +11,7 @@
 int main(int argc, const char *argv[]) {
     bool running = true;
     auto gameWindow = GameWindow();
-    auto map = Heightmap(5, 20.f);
+    auto map = Heightmap(6, 32.f);
 
     map.loadFromFile("images/heightmap.png", 60.f);
     map.upload();
@@ -61,7 +61,7 @@ int main(int argc, const char *argv[]) {
         auto perspective = glm::perspective(glm::radians(45.f), (float)width / height, 0.01f, 100.f);
         auto xform = perspective * glm::inverse(view);
 
-        map.render(xform);
+        map.render(xform, glm::vec3(), 100.f);
 
         SDL_GL_SwapWindow(gameWindow);
     }

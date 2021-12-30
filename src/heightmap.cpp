@@ -24,11 +24,11 @@ Heightmap::~Heightmap() {
 bool Heightmap::loadFromFile(const char *path, float size) {
     mapWidth = size;
     int n;
-    auto image = stbi_load(path, &width, &height, &n, 3);
+    auto image = stbi_load(path, &pixelWidth, &pixelHeight, &n, 3);
     if (image == nullptr) {
         return false;
     }
-    data.resize(width * height * 3, 0);
+    data.resize(pixelWidth * pixelHeight * 3, 0);
     auto p = &image[0];
     for (auto &i : data) {
         i = (float)*p / 255.f;
@@ -184,13 +184,12 @@ void Heightmap::upload() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,  GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, width, height, 0, GL_RGB, GL_FLOAT, &data[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, pixelWidth, pixelHeight, 0, GL_RGB, GL_FLOAT, &data[0]);
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-void Heightmap::render(glm::mat4x4 view) {
+void Heightmap::render(glm::mat4x4 view, glm::vec3 center, float renderDistance) {
     unsigned int bufferCount = indexCount;
-    unsigned int range = 8;
     void *bufferOffset = 0;
     GLfloat scale = 1.f;
     GLfloat texScale = chunkSize / mapWidth;
@@ -202,10 +201,10 @@ void Heightmap::render(glm::mat4x4 view) {
     glBindTexture(GL_TEXTURE_2D, texture);
     glBindVertexArray(vao);
     glUniform1i(locTex, 0);
-    glUniform2f(locTexScale, texScale, texScale * height / width);
+    glUniform2f(locTexScale, texScale, texScale * pixelHeight / pixelWidth);
     glUniform2f(locTexOffset, 0.f, 0.f);
     glUniformMatrix4fv(locXForm, 1, GL_FALSE, &xform[0][0]);
-    for (int i = 1; i <= range; i *= 2) {
+    for (float dist = chunkSize / 4.f; dist < renderDistance; dist *= 2) {
         glUniform2f(locScale, scale, scale);
         glDrawElements(GL_TRIANGLES, bufferCount, GL_UNSIGNED_INT, bufferOffset);
 

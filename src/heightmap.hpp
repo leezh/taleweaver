@@ -10,8 +10,8 @@ class Heightmap {
         unsigned int detail;
         float chunkSize;
         float mapWidth;
-        int width;
-        int height;
+        int pixelWidth;
+        int pixelHeight;
 
         unsigned int power;
         GLuint texture;
@@ -39,5 +39,5 @@ class Heightmap {
         ~Heightmap();
         bool loadFromFile(const char *path, float size);
         void upload();
-        void render(glm::mat4x4 view);
+        void render(glm::mat4x4 view, glm::vec3 center, float renderDistance);
 };
