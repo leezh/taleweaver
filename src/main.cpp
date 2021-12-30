@@ -11,9 +11,9 @@
 int main(int argc, const char *argv[]) {
     bool running = true;
     auto gameWindow = GameWindow();
-    auto map = Heightmap(6, 32.f);
+    auto map = Heightmap(6, 0.5f);
 
-    map.loadFromFile("images/heightmap.png", 60.f);
+    map.loadFromFile("images/heightmap.png", 120.f);
     map.upload();
 
     Uint64 elapsedTicks = SDL_GetTicks64();
@@ -58,10 +58,10 @@ int main(int argc, const char *argv[]) {
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        auto perspective = glm::perspective(glm::radians(45.f), (float)width / height, 0.01f, 100.f);
+        auto perspective = glm::perspective(glm::radians(45.f), (float)width / height, 0.01f, 1000.f);
         auto xform = perspective * glm::inverse(view);
 
-        map.render(xform, glm::vec3(), 100.f);
+        map.render(xform, glm::vec3(view[3]), 1000.f);
 
         SDL_GL_SwapWindow(gameWindow);
     }

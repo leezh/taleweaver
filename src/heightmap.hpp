@@ -10,6 +10,7 @@ class Heightmap {
         unsigned int detail;
         float chunkSize;
         float mapWidth;
+        float mapHeight;
         int pixelWidth;
         int pixelHeight;
 
@@ -35,9 +36,9 @@ class Heightmap {
         void quitGL();
 
     public:
-        Heightmap(unsigned int detail, float chunksize);
+        Heightmap(unsigned int detail, float tileWidth);
         ~Heightmap();
-        bool loadFromFile(const char *path, float size);
+        bool loadFromFile(const char *path, float width);
         void upload();
         void render(glm::mat4x4 view, glm::vec3 center, float renderDistance);
 };

@@ -10,10 +10,11 @@ static const GLchar fragment[] = {
 #include "shaders/heightmap.frag.cstr"
 };
 
-Heightmap::Heightmap(unsigned int detail, float chunkSize):
+Heightmap::Heightmap(unsigned int detail, float tileWidth):
     detail(detail),
     chunkSize(chunkSize),
     loadedGL(false) {
+    chunkSize = (float)(1 << detail) * tileWidth;
     initGL();
 }
 
@@ -21,8 +22,7 @@ Heightmap::~Heightmap() {
     if (loadedGL) quitGL();
 }
 
-bool Heightmap::loadFromFile(const char *path, float size) {
-    mapWidth = size;
+bool Heightmap::loadFromFile(const char *path, float width) {
     int n;
     auto image = stbi_load(path, &pixelWidth, &pixelHeight, &n, 3);
     if (image == nullptr) {
@@ -36,6 +36,8 @@ bool Heightmap::loadFromFile(const char *path, float size) {
         p = &p[1];
     }
     stbi_image_free(image);
+    mapWidth = width;
+    mapHeight = width * pixelHeight / pixelWidth;
     return true;
 }
 
@@ -189,11 +191,14 @@ void Heightmap::upload() {
 }
 
 void Heightmap::render(glm::mat4x4 view, glm::vec3 center, float renderDistance) {
-    unsigned int bufferCount = indexCount;
-    void *bufferOffset = 0;
-    GLfloat scale = 1.f;
-    GLfloat texScale = chunkSize / mapWidth;
-    glm::mat4x4 xform = glm::scale(view, glm::vec3(chunkSize, 3.f, chunkSize));
+    float halfChunk = chunkSize / 2.f;
+    center.y = 0.f;
+    center.x = glm::round(center.x / halfChunk) * halfChunk;
+    center.z = glm::round(center.z / halfChunk) * halfChunk;
+    auto texScale = glm::vec2(chunkSize / mapWidth, chunkSize / mapHeight);
+    auto texOffset = glm::vec2(center.x / mapWidth, center.z / mapHeight);
+    auto xform = glm::translate(view, center);
+    xform = glm::scale(xform, glm::vec3(chunkSize, 3.f, chunkSize));
 
     glEnable(GL_DEPTH_TEST);
     glUseProgram(program);
@@ -201,9 +206,13 @@ void Heightmap::render(glm::mat4x4 view, glm::vec3 center, float renderDistance)
     glBindTexture(GL_TEXTURE_2D, texture);
     glBindVertexArray(vao);
     glUniform1i(locTex, 0);
-    glUniform2f(locTexScale, texScale, texScale * pixelHeight / pixelWidth);
-    glUniform2f(locTexOffset, 0.f, 0.f);
+    glUniform2f(locTexScale, texScale.x, texScale.y);
+    glUniform2f(locTexOffset, texOffset.x, texOffset.y);
     glUniformMatrix4fv(locXForm, 1, GL_FALSE, &xform[0][0]);
+
+    unsigned int bufferCount = indexCount;
+    void *bufferOffset = 0;
+    GLfloat scale = 1.f;
     for (float dist = chunkSize / 4.f; dist < renderDistance; dist *= 2) {
         glUniform2f(locScale, scale, scale);
         glDrawElements(GL_TRIANGLES, bufferCount, GL_UNSIGNED_INT, bufferOffset);
