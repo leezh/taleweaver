@@ -3,18 +3,18 @@ project(taleweaver C CXX)
 
 add_executable(${PROJECT_NAME})
 
-add_subdirectory("extlib/glm" glm)
+add_subdirectory("extlib/glm" glm EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} glm::glm)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "extlib/stb")
 
-add_subdirectory("extlib/glad/cmake" glad_cmake)
+add_subdirectory("extlib/glad/cmake" glad_cmake EXCLUDE_FROM_ALL)
 glad_add_library(glad REPRODUCIBLE API gl:core=3.3)
 target_link_libraries(${PROJECT_NAME} glad)
 
 set(SDL_STATIC ON CACHE BOOL "" FORCE)
 set(SDL_SHARED OFF CACHE BOOL "" FORCE)
-add_subdirectory("extlib/sdl")
+add_subdirectory("extlib/sdl" sdl EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} SDL2main SDL2-static)
 
 target_sources(${PROJECT_NAME} PRIVATE
