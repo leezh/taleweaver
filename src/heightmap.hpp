@@ -36,9 +36,9 @@ class Heightmap {
         void quitGL();
 
     public:
-        Heightmap(unsigned int detail, float tileWidth);
+        Heightmap(unsigned int detail, float tileWidth = 1.f);
         ~Heightmap();
-        bool loadFromFile(const char *path, float width);
+        bool loadFromImage(const char *path, float width, float scale = 1.f);
         void upload();
         void render(glm::mat4x4 view, glm::vec3 center, float renderDistance);
 };

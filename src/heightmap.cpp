@@ -12,7 +12,6 @@ static const GLchar fragment[] = {
 
 Heightmap::Heightmap(unsigned int detail, float tileWidth):
     detail(detail),
-    chunkSize(chunkSize),
     loadedGL(false) {
     chunkSize = (float)(1 << detail) * tileWidth;
     initGL();
@@ -22,7 +21,7 @@ Heightmap::~Heightmap() {
     if (loadedGL) quitGL();
 }
 
-bool Heightmap::loadFromFile(const char *path, float width) {
+bool Heightmap::loadFromImage(const char *path, float width, float scale) {
     int n;
     auto image = stbi_load(path, &pixelWidth, &pixelHeight, &n, 3);
     if (image == nullptr) {
@@ -32,7 +31,7 @@ bool Heightmap::loadFromFile(const char *path, float width) {
     auto p = &image[0];
     for (auto &i : data) {
         i = (float)*p / 255.f;
-        i *= i;
+        i *= i * scale;
         p = &p[1];
     }
     stbi_image_free(image);
@@ -198,7 +197,7 @@ void Heightmap::render(glm::mat4x4 view, glm::vec3 center, float renderDistance)
     auto texScale = glm::vec2(chunkSize / mapWidth, chunkSize / mapHeight);
     auto texOffset = glm::vec2(center.x / mapWidth, center.z / mapHeight);
     auto xform = glm::translate(view, center);
-    xform = glm::scale(xform, glm::vec3(chunkSize, 3.f, chunkSize));
+    xform = glm::scale(xform, glm::vec3(chunkSize, 1.f, chunkSize));
 
     glEnable(GL_DEPTH_TEST);
     glUseProgram(program);
