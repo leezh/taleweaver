@@ -41,3 +41,9 @@ add_resource(res
     shaders/heightmap.frag
 )
 target_link_libraries(${PROJECT_NAME} res)
+
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+install(DIRECTORY images DESTINATION share/taleweaver
+  FILES_MATCHING
+  PATTERN "*.png"
+)
