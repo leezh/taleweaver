@@ -8,12 +8,16 @@
 #include "render.hpp"
 #include "heightmap.hpp"
 
+static const unsigned char heightmap[] = {
+#include "images/heightmap.png.hex"
+};
+
 int main(int argc, const char *argv[]) {
     bool running = true;
     auto gameWindow = GameWindow();
     auto map = Heightmap(6);
 
-    map.loadFromImage("images/heightmap.png", 2000.f, 100.f);
+    map.loadFromMemory(heightmap, sizeof(heightmap), 2000.f, 100.f);
     map.upload();
 
     Uint64 elapsedTicks = SDL_GetTicks64();

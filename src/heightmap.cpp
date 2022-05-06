@@ -40,6 +40,25 @@ bool Heightmap::loadFromImage(const char *path, float width, float scale) {
     return true;
 }
 
+bool Heightmap::loadFromMemory(const unsigned char *buffer, int length, float width, float scale) {
+    int n;
+    auto image = stbi_load_from_memory(buffer, length, &pixelWidth, &pixelHeight, &n, 3);
+    if (image == nullptr) {
+        return false;
+    }
+    data.resize(pixelWidth * pixelHeight * 3, 0);
+    auto p = &image[0];
+    for (auto &i : data) {
+        i = (float)*p / 255.f;
+        i *= i * scale;
+        p = &p[1];
+    }
+    stbi_image_free(image);
+    mapWidth = width;
+    mapHeight = width * pixelHeight / pixelWidth;
+    return true;
+}
+
 void Heightmap::initGL() {
     unsigned int length = (1 << detail);
     unsigned int triCount = (length - 1) * (length - 1) * 2;
@@ -181,7 +200,7 @@ void Heightmap::quitGL() {
 void Heightmap::upload() {
     if (!loadedGL) initGL();
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,  GL_CLAMP_TO_BORDER);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,  GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,  GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

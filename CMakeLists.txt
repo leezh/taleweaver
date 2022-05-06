@@ -39,6 +39,8 @@ add_resource(res
     shaders/render.frag
     shaders/heightmap.vert
     shaders/heightmap.frag
+  HEX
+    images/heightmap.png
 )
 target_link_libraries(${PROJECT_NAME} res)
 
