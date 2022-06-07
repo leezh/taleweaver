@@ -3,6 +3,9 @@ project(taleweaver C CXX)
 
 add_executable(${PROJECT_NAME})
 
+add_subdirectory("extlib/entt" entt EXCLUDE_FROM_ALL)
+target_link_libraries(${PROJECT_NAME} EnTT)
+
 add_subdirectory("extlib/glm" glm EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} glm::glm)
 

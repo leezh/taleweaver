@@ -11,3 +11,6 @@
 [submodule "glm"]
 	path = extlib/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "extlib/entt"]
+	path = extlib/entt
+	url = https://github.com/skypjack/entt.git
