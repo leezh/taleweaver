@@ -18,6 +18,13 @@ add_subdirectory("extlib/sdl" sdl EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} SDL2main SDL2-static)
 
 target_sources(${PROJECT_NAME} PRIVATE
+  LICENSE.md
+  README.md
+  images/heightmap.png
+  shaders/render.vert
+  shaders/render.frag
+  shaders/heightmap.vert
+  shaders/heightmap.frag
   src/window.hpp
   src/window.cpp
   src/main.cpp
