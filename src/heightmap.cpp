@@ -231,7 +231,8 @@ void Heightmap::render(glm::mat4x4 view, glm::vec3 center, float renderDistance)
     unsigned int bufferCount = indexCount;
     void *bufferOffset = 0;
     GLfloat scale = 1.f;
-    for (float dist = chunkSize / 4.f; dist < renderDistance; dist *= 2) {
+    float dist = chunkSize / 4.f;
+    while (dist < renderDistance) {
         glUniform2f(locScale, scale, scale);
         glDrawElements(GL_TRIANGLES, bufferCount, GL_UNSIGNED_INT, bufferOffset);
 
@@ -246,6 +247,7 @@ void Heightmap::render(glm::mat4x4 view, glm::vec3 center, float renderDistance)
 
         bufferCount = borderIndexCount;
         bufferOffset = borderOffset;
+        dist *= 2;
         scale *= 2.f;
     }
 }

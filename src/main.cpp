@@ -50,7 +50,7 @@ int main(int argc, const char *argv[]) {
 
     auto camera = Camera{45.f, 0.01f, 4000.f};
 
-    auto map = Heightmap(6);
+    auto map = Heightmap();
 
     map.loadFromMemory(heightmap, sizeof(heightmap), 2000.f, 100.f);
     map.upload();

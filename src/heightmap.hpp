@@ -36,7 +36,7 @@ class Heightmap {
         void quitGL();
 
     public:
-        Heightmap(unsigned int detail, float tileWidth = 1.f);
+        Heightmap(unsigned int detail = 7, float tileWidth = 1.f);
         ~Heightmap();
         bool loadFromImage(const char *path, float width, float scale = 1.f);
         bool loadFromMemory(const unsigned char *buffer, int length, float width, float scale = 1.f);
