@@ -3,8 +3,15 @@ project(taleweaver C CXX)
 
 add_executable(${PROJECT_NAME})
 
+# == Dependencies ==
+find_package(Git REQUIRED)
+execute_process(COMMAND
+  ${GIT_EXECUTABLE} submodule update --init --recursive
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)
+
 add_subdirectory("extlib/entt" entt EXCLUDE_FROM_ALL)
-target_link_libraries(${PROJECT_NAME} EnTT)
+target_link_libraries(${PROJECT_NAME} EnTT::EnTT)
 
 add_subdirectory("extlib/glm" glm EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} glm::glm)
@@ -20,6 +27,7 @@ set(SDL_SHARED OFF CACHE BOOL "" FORCE)
 add_subdirectory("extlib/sdl" sdl EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} SDL2main SDL2-static)
 
+# == Source Files ==
 target_sources(${PROJECT_NAME} PRIVATE
   LICENSE.md
   README.md
@@ -41,6 +49,7 @@ target_sources(${PROJECT_NAME} PRIVATE
   src/heightmap.cpp
 )
 
+# == Compiled-in Resources ==
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/resource")
 include(resource)
 add_resource(res
@@ -54,6 +63,7 @@ add_resource(res
 )
 target_link_libraries(${PROJECT_NAME} res)
 
+# == Install Targets ==
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 install(DIRECTORY images DESTINATION share/taleweaver
   FILES_MATCHING
