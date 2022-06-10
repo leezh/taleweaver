@@ -3,7 +3,6 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
-#include <stb_image.h>
 #include "window.hpp"
 #include "render.hpp"
 #include "heightmap.hpp"
@@ -12,30 +11,61 @@ static const unsigned char heightmap[] = {
 #include "images/heightmap.png.hex"
 };
 
+struct Spatial {
+    glm::mat4 transform = glm::mat4(1);
+
+    void translate(glm::vec3 offset) {
+        transform = glm::translate(glm::mat4(1), offset) * transform;
+    }
+
+    void rotate_x(float angle) {
+        transform = glm::rotate(transform, angle, glm::vec3(1, 0, 1));
+    }
+
+    void rotate_y(float angle) {
+        transform = glm::rotate(transform, angle, glm::vec3(0, 1, 0));
+    }
+
+    void rotate_z(float angle) {
+        transform = glm::rotate(transform, angle, glm::vec3(0, 0, 1));
+    }
+};
+
+struct Camera {
+    float fov;
+    float near;
+    float far;
+
+    glm::mat4 get_projection(float aspect) {
+        return glm::perspective(glm::radians(fov), aspect, near, far);
+    }
+};
+
 int main(int argc, const char *argv[]) {
-    bool running = true;
     auto gameWindow = GameWindow();
+    bool running = true;
+
+    auto spatial = Spatial();
+    spatial.translate(glm::vec3(0.f, 25.f, 0.f));
+
+    auto camera = Camera{45.f, 0.01f, 4000.f};
+
     auto map = Heightmap(6);
 
     map.loadFromMemory(heightmap, sizeof(heightmap), 2000.f, 100.f);
     map.upload();
 
     Uint64 elapsedTicks = SDL_GetTicks64();
-    auto view = glm::translate(glm::mat4(1.0), glm::vec3(0.f, 25.f, 0.f));
     while (running) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-                case SDL_WINDOWEVENT:
-                    switch (event.window.event) {
-                        case SDL_WINDOWEVENT_CLOSE:
-                            running = false;
-                            break;
-                        default:
-                            break;
-                    }
-                default:
-                    break;
+            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE) {
+                running = false;
+                break;
+            }
+            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+                running = false;
+                break;
             }
         }
 
@@ -53,18 +83,18 @@ int main(int argc, const char *argv[]) {
         if (state[SDL_GetScancodeFromKey(SDLK_q)]) input.y -= 1.f;
         if (state[SDL_GetScancodeFromKey(SDLK_e)]) input.y += 1.f;
         if (glm::length(input) > 1.f) input = glm::normalize(input);
-        view = glm::rotate(view, glm::radians(turn * delta), glm::vec3(0.f, 1.f, 0.f));
-        view = glm::translate(view, input * 20.f * delta);
+
+        input = glm::mat3(spatial.transform) * input;
+        spatial.translate(input);
+        spatial.rotate_y(glm::radians(turn * delta));
 
         int width, height;
         SDL_GL_GetDrawableSize(gameWindow, &width, &height);
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        auto view = camera.get_projection((float)width / height) * glm::inverse(spatial.transform);
 
-        auto perspective = glm::perspective(glm::radians(45.f), (float)width / height, 0.01f, 4000.f);
-        auto xform = perspective * glm::inverse(view);
-
-        map.render(xform, glm::vec3(view[3]), 1000.f);
+        map.render(view, glm::vec3(spatial.transform[3]), 4000.f);
 
         SDL_GL_SwapWindow(gameWindow);
     }
