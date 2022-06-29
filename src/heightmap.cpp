@@ -10,52 +10,46 @@ static const GLchar fragment[] = {
 #include "shaders/heightmap.frag.cstr"
 };
 
-Heightmap::Heightmap(unsigned int detail, float tileWidth):
+Heightmap::Heightmap(unsigned int detail):
     detail(detail),
     loadedGL(false) {
-    chunkSize = (float)(1 << detail) * tileWidth;
-    initGL();
 }
 
 Heightmap::~Heightmap() {
     if (loadedGL) quitGL();
 }
 
-bool Heightmap::loadFromImage(const char *path, float width, float scale) {
+bool Heightmap::loadFromImage(const char *path, float min, float max) {
     int n;
-    auto image = stbi_load(path, &pixelWidth, &pixelHeight, &n, 3);
+    auto image = stbi_load(path, &width, &height, &n, 3);
     if (image == nullptr) {
         return false;
     }
-    data.resize(pixelWidth * pixelHeight * 3, 0);
+    data.resize(width * height * 3, 0);
     auto p = &image[0];
     for (auto &i : data) {
         i = (float)*p / 255.f;
-        i *= i * scale;
+        i = i * i * (max - min) + min;
         p = &p[1];
     }
     stbi_image_free(image);
-    mapWidth = width;
-    mapHeight = width * pixelHeight / pixelWidth;
     return true;
 }
 
-bool Heightmap::loadFromMemory(const unsigned char *buffer, int length, float width, float scale) {
+bool Heightmap::loadFromMemory(const unsigned char *buffer, int length, float min, float max) {
     int n;
-    auto image = stbi_load_from_memory(buffer, length, &pixelWidth, &pixelHeight, &n, 3);
+    auto image = stbi_load_from_memory(buffer, length, &width, &height, &n, 3);
     if (image == nullptr) {
         return false;
     }
-    data.resize(pixelWidth * pixelHeight * 3, 0);
+    data.resize(width * height * 3, 0);
     auto p = &image[0];
     for (auto &i : data) {
         i = (float)*p / 255.f;
-        i *= i * scale;
+        i = i * i * (max - min) + min;
         p = &p[1];
     }
     stbi_image_free(image);
-    mapWidth = width;
-    mapHeight = width * pixelHeight / pixelWidth;
     return true;
 }
 
@@ -204,17 +198,19 @@ void Heightmap::upload() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,  GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, pixelWidth, pixelHeight, 0, GL_RGB, GL_FLOAT, &data[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, width, height, 0, GL_RGB, GL_FLOAT, &data[0]);
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void Heightmap::render(glm::mat4x4 view, glm::vec3 center, float renderDistance) {
+    float chunkSize = (float)(1 << detail);
     float halfChunk = chunkSize / 2.f;
     center.y = 0.f;
     center.x = glm::round(center.x / halfChunk) * halfChunk;
     center.z = glm::round(center.z / halfChunk) * halfChunk;
-    auto texScale = glm::vec2(chunkSize / mapWidth, chunkSize / mapHeight);
-    auto texOffset = glm::vec2(center.x / mapWidth, center.z / mapHeight);
+    auto size = glm::vec2(width, height);
+    auto texScale = chunkSize / size;
+    auto texOffset = glm::vec2(center.x, center.z) / size;
     auto xform = glm::translate(view, center);
     xform = glm::scale(xform, glm::vec3(chunkSize, 1.f, chunkSize));
 

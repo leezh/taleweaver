@@ -16,9 +16,9 @@ int main(int argc, const char *argv[]) {
     bool running = true;
 
     auto camera = Camera();
-    auto map = Heightmap();
+    auto map = Heightmap(7);
 
-    map.loadFromMemory(heightmap, sizeof(heightmap), 2000.f, 100.f);
+    map.loadFromMemory(heightmap, sizeof(heightmap), -100.f, 100.f);
     map.upload();
 
     Uint64 elapsedTicks = SDL_GetTicks64();
