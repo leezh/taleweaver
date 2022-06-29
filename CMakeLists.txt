@@ -36,6 +36,8 @@ target_sources(${PROJECT_NAME} PRIVATE
   shaders/render.frag
   shaders/heightmap.vert
   shaders/heightmap.frag
+  src/spatial.hpp
+  src/camera.hpp
   src/window.hpp
   src/window.cpp
   src/main.cpp

@@ -1,55 +1,21 @@
 #define GLM_FORCE_SWIZZLE
 #include <iostream>
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
 #include "window.hpp"
 #include "render.hpp"
+#include "spatial.hpp"
+#include "camera.hpp"
 #include "heightmap.hpp"
 
 static const unsigned char heightmap[] = {
 #include "images/heightmap.png.hex"
 };
 
-struct Spatial {
-    glm::mat4 transform = glm::mat4(1);
-
-    void translate(glm::vec3 offset) {
-        transform = glm::translate(glm::mat4(1), offset) * transform;
-    }
-
-    void rotate_x(float angle) {
-        transform = glm::rotate(transform, angle, glm::vec3(1, 0, 1));
-    }
-
-    void rotate_y(float angle) {
-        transform = glm::rotate(transform, angle, glm::vec3(0, 1, 0));
-    }
-
-    void rotate_z(float angle) {
-        transform = glm::rotate(transform, angle, glm::vec3(0, 0, 1));
-    }
-};
-
-struct Camera {
-    float fov;
-    float near;
-    float far;
-
-    glm::mat4 get_projection(float aspect) {
-        return glm::perspective(glm::radians(fov), aspect, near, far);
-    }
-};
-
 int main(int argc, const char *argv[]) {
     auto gameWindow = GameWindow();
     bool running = true;
 
-    auto spatial = Spatial();
-    spatial.translate(glm::vec3(0.f, 25.f, 0.f));
-
-    auto camera = Camera{45.f, 0.01f, 4000.f};
-
+    auto camera = Camera();
     auto map = Heightmap();
 
     map.loadFromMemory(heightmap, sizeof(heightmap), 2000.f, 100.f);
@@ -84,17 +50,17 @@ int main(int argc, const char *argv[]) {
         if (state[SDL_GetScancodeFromKey(SDLK_e)]) input.y += 1.f;
         if (glm::length(input) > 1.f) input = glm::normalize(input);
 
-        input = glm::mat3(spatial.transform) * input;
-        spatial.translate(input);
-        spatial.rotate_y(glm::radians(turn * delta));
+        input = glm::mat3(camera.transform) * input;
+        camera.translate(input);
+        camera.rotate_y(glm::radians(turn * delta));
 
         int width, height;
         SDL_GL_GetDrawableSize(gameWindow, &width, &height);
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        auto view = camera.get_projection((float)width / height) * glm::inverse(spatial.transform);
+        auto view = camera.get_view(width, height);
 
-        map.render(view, glm::vec3(spatial.transform[3]), 4000.f);
+        map.render(view, camera.get_offset(), 4000.f);
 
         SDL_GL_SwapWindow(gameWindow);
     }
