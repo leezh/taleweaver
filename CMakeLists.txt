@@ -27,6 +27,11 @@ set(SDL_SHARED OFF CACHE BOOL "" FORCE)
 add_subdirectory("extlib/sdl" sdl EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} SDL2main SDL2-static)
 
+set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
+set(TINYGLTF_INSTALL OFF CACHE BOOL "" FORCE)
+add_subdirectory("extlib/tinygltf" tinygltf EXCLUDE_FROM_ALL)
+target_link_libraries(${PROJECT_NAME} tinygltf)
+
 # == Source Files ==
 target_sources(${PROJECT_NAME} PRIVATE
   LICENSE.md

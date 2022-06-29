@@ -14,3 +14,6 @@
 [submodule "extlib/entt"]
 	path = extlib/entt
 	url = https://github.com/skypjack/entt.git
+[submodule "extlib/tinygltf"]
+	path = extlib/tinygltf
+	url = https://github.com/syoyo/tinygltf.git
