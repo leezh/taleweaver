@@ -1,14 +1,15 @@
 package net.leezh.taleweaver;
 
-import androidx.appcompat.app.AppCompatActivity;
+import org.libsdl.app.SDLActivity;
 
-import android.os.Bundle;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends SDLActivity {
+    public static native int nativeRunMain();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    protected String[] getLibraries() {
+        return new String[] {
+            "SDL2",
+            "taleweaver"
+        };
     }
 }

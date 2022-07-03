@@ -5,6 +5,7 @@ if(NOT ANDROID)
   add_executable(${PROJECT_NAME})
 else()
   add_library(${PROJECT_NAME} SHARED)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE USE_JNI)
 endif()
 
 # == Dependencies ==

@@ -4,15 +4,24 @@ plugins {
 
 android {
     compileSdk 32
+    ndkVersion '18.1.5063045'
 
     defaultConfig {
         applicationId "net.leezh.taleweaver"
         minSdk 23
         targetSdk 32
         versionCode 1
-        versionName "1.0"
+        versionName '1.0.0'
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_STL=c++_static'
+                abiFilters 'arm64-v8a'
+                cppFlags ''
+            }
+        }
     }
 
     buildTypes {
@@ -24,6 +33,15 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    externalNativeBuild {
+        cmake {
+            path file('../CMakeLists.txt')
+            version '3.18.1'
+        }
+    }
+    buildFeatures {
+        viewBinding true
     }
 }
 
