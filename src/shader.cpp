@@ -6,7 +6,7 @@
 #ifndef USE_GLES
 static const GLchar* shaderHeader = "#version 330 core\n";
 #else
-static const GLchar* shaderHeader = "#version 300 es\n";
+static const GLchar* shaderHeader = "#version 300 es\nprecision mediump float;\n";
 #endif
 
 ShaderCompiler::ShaderCompiler() {

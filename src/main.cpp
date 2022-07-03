@@ -16,7 +16,7 @@ int main(int argc, const char *argv[]) {
     bool running = true;
 
     auto camera = Camera();
-    auto map = Heightmap(7);
+    auto map = Heightmap(6);
 
     map.loadFromMemory(heightmap, sizeof(heightmap), -100.f, 100.f);
     map.upload();
