@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extlib/entt" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extlib/glad" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extlib/glm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extlib/sdl" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extlib/stb" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/extlib/tinygltf" vcs="Git" />
+  </component>
+</project>
