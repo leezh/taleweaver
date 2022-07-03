@@ -29,7 +29,7 @@ function (add_resource TARGET)
                 DEPENDS "${SOURCE}"
                 COMMAND "${Python_EXECUTABLE}" "${RES_${MODE}_PY}" "${SOURCE}" "${OUTPUT}"
             )
-            target_sources("${TARGET}" PRIVATE "${OUTPUT}")
+            target_sources("${TARGET}" INTERFACE "${OUTPUT}")
 
         endforeach()
     endforeach()

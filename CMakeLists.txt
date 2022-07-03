@@ -1,7 +1,11 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.18)
 project(taleweaver C CXX)
 
-add_executable(${PROJECT_NAME})
+if(NOT ANDROID)
+  add_executable(${PROJECT_NAME})
+else()
+  add_library(${PROJECT_NAME} SHARED)
+endif()
 
 # == Dependencies ==
 find_package(Git REQUIRED)
@@ -9,6 +13,11 @@ execute_process(COMMAND
   ${GIT_EXECUTABLE} submodule update --init --recursive
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
+
+set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
+set(TINYGLTF_INSTALL OFF CACHE BOOL "" FORCE)
+add_subdirectory("extlib/tinygltf" tinygltf EXCLUDE_FROM_ALL)
+target_link_libraries(${PROJECT_NAME} tinygltf)
 
 add_subdirectory("extlib/entt" entt EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} EnTT::EnTT)
@@ -22,15 +31,16 @@ add_subdirectory("extlib/glad/cmake" glad_cmake EXCLUDE_FROM_ALL)
 glad_add_library(glad REPRODUCIBLE API gl:core=3.3)
 target_link_libraries(${PROJECT_NAME} glad)
 
-set(SDL_STATIC ON CACHE BOOL "" FORCE)
-set(SDL_SHARED OFF CACHE BOOL "" FORCE)
 add_subdirectory("extlib/sdl" sdl EXCLUDE_FROM_ALL)
-target_link_libraries(${PROJECT_NAME} SDL2main SDL2-static)
-
-set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
-set(TINYGLTF_INSTALL OFF CACHE BOOL "" FORCE)
-add_subdirectory("extlib/tinygltf" tinygltf EXCLUDE_FROM_ALL)
-target_link_libraries(${PROJECT_NAME} tinygltf)
+if(NOT ANDROID)
+  set(SDL_STATIC ON CACHE BOOL "" FORCE)
+  set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+  target_link_libraries(${PROJECT_NAME} SDL2main SDL2-static)
+else()
+  set(SDL_STATIC OFF CACHE BOOL "" FORCE)
+  set(SDL_SHARED ON CACHE BOOL "" FORCE)
+  target_link_libraries(${PROJECT_NAME} SDL2)
+endif()
 
 # == Source Files ==
 target_sources(${PROJECT_NAME} PRIVATE
