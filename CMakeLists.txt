@@ -28,7 +28,12 @@ target_link_libraries(${PROJECT_NAME} glm::glm)
 target_include_directories(${PROJECT_NAME} PRIVATE "extlib/stb")
 
 add_subdirectory("extlib/glad/cmake" glad_cmake EXCLUDE_FROM_ALL)
-glad_add_library(glad REPRODUCIBLE API gl:core=3.3)
+if(NOT ANDROID)
+  glad_add_library(glad REPRODUCIBLE API gl:core=3.3)
+else()
+  glad_add_library(glad REPRODUCIBLE API gles2=3.0)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC USE_GLES)
+endif()
 target_link_libraries(${PROJECT_NAME} glad)
 
 add_subdirectory("extlib/sdl" sdl EXCLUDE_FROM_ALL)

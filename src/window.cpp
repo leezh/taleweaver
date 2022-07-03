@@ -1,5 +1,5 @@
 #include "window.hpp"
-#include <glad/gl.h>
+#include "gl.hpp"
 
 GameWindow::GameWindow() {
     window = nullptr;
@@ -31,7 +31,11 @@ GameWindow::GameWindow() {
         return;
     }
 
+#ifndef USE_GLES
     gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
+#else
+    gladLoadGLES2((GLADloadfunc)SDL_GL_GetProcAddress);
+#endif
 
     loaded = true;
 }

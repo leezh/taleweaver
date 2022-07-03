@@ -1,8 +1,6 @@
-#version 150 core
-
 in vec2 uv;
 in float height;
-out vec4 outColor;
+layout(location=0) out vec4 outColor;
 uniform sampler2D tex;
 
 void main() {

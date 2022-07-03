@@ -1,5 +1,3 @@
-#version 150 core
-
 in vec2 position;
 out vec2 uv;
 out float height;

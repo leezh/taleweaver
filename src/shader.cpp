@@ -3,6 +3,12 @@
 #include <SDL_log.h>
 #include "shader.hpp"
 
+#ifndef USE_GLES
+static const GLchar* shaderHeader = "#version 330 core\n";
+#else
+static const GLchar* shaderHeader = "#version 300 es\n";
+#endif
+
 ShaderCompiler::ShaderCompiler() {
 }
 
@@ -13,8 +19,9 @@ ShaderCompiler::~ShaderCompiler() {
 }
 
 void ShaderCompiler::compileStage(GLenum type, const GLchar *source) {
+    const GLchar* sources[] = {shaderHeader, source};
     Stage stage = {glCreateShader(type), source};
-    glShaderSource(stage.shader, 1, &source, 0);
+    glShaderSource(stage.shader, 2, sources, 0);
     glCompileShader(stage.shader);
     GLint status;
     glGetShaderiv(stage.shader, GL_COMPILE_STATUS, &status);
@@ -30,18 +37,10 @@ void ShaderCompiler::compileStage(GLenum type, const GLchar *source) {
     stages.push_back(stage);
 }
 
-void ShaderCompiler::bindFragmentOutput(GLuint index, const GLchar *name) {
-    Output output = {index, name};
-    fragmentOutputs.push_back(output);
-}
-
 GLuint ShaderCompiler::create() {
     GLuint program = glCreateProgram();
     for (Stage &stage : stages) {
         glAttachShader(program, stage.shader);
-    }
-    for (Output &output : fragmentOutputs) {
-        glBindFragDataLocation(program, output.index, output.name);
     }
     glLinkProgram(program);
     for (Stage &stage : stages) {

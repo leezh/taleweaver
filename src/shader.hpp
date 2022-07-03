@@ -1,8 +1,6 @@
-#ifndef TALEWEAVER_SHADER_H
-#define TALEWEAVER_SHADER_H
-
+#pragma once
 #include <vector>
-#include <glad/gl.h>
+#include "gl.hpp"
 
 class ShaderCompiler {
     private:
@@ -10,18 +8,10 @@ class ShaderCompiler {
             GLenum shader;
             const GLchar *source;
         };
-        struct Output {
-            GLuint index;
-            const GLchar *name;
-        };
         std::vector<Stage> stages;
-        std::vector<Output> fragmentOutputs;
     public:
         ShaderCompiler();
         ~ShaderCompiler();
         void compileStage(GLenum type, const GLchar *source);
-        void bindFragmentOutput(GLuint index, const GLchar *name);
         GLuint create();
 };
-
-#endif

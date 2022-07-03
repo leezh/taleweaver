@@ -47,7 +47,6 @@ void renderInit() {
     ShaderCompiler compiler;
     compiler.compileStage(GL_VERTEX_SHADER, vertex);
     compiler.compileStage(GL_FRAGMENT_SHADER, fragment);
-    compiler.bindFragmentOutput(0, "outColor");
     program = compiler.create();
 
     glUseProgram(program);
@@ -62,8 +61,8 @@ void renderInit() {
     glVertexAttribPointer(locPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
     glGenTextures(1, &blanktex);
-    glBindTexture(GL_TEXTURE_RECTANGLE, blanktex);
-    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, blankpixels);
+    glBindTexture(GL_TEXTURE_2D, blanktex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, blankpixels);
 }
 
 void renderQuit() {
@@ -95,9 +94,9 @@ void renderPrepare(int width, int height) {
 void renderGlyph(RenderGlyph *glyph, float x, float y) {
     glActiveTexture(GL_TEXTURE0);
     if (glyph->tex) {
-        glBindTexture(GL_TEXTURE_RECTANGLE, glyph->tex);
+        glBindTexture(GL_TEXTURE_2D, glyph->tex);
     } else {
-        glBindTexture(GL_TEXTURE_RECTANGLE, blanktex);
+        glBindTexture(GL_TEXTURE_2D, blanktex);
     }
     glUniform2f(locOffset, x, y);
     glUniform2f(locSize, glyph->w, glyph->h);
@@ -109,9 +108,9 @@ void renderGlyph(RenderGlyph *glyph, float x, float y) {
 void renderGlyphCropped(RenderGlyph *glyph, float x, float y, float left, float top, float right, float bottom) {
     glActiveTexture(GL_TEXTURE0);
     if (glyph->tex) {
-        glBindTexture(GL_TEXTURE_RECTANGLE, glyph->tex);
+        glBindTexture(GL_TEXTURE_2D, glyph->tex);
     } else {
-        glBindTexture(GL_TEXTURE_RECTANGLE, blanktex);
+        glBindTexture(GL_TEXTURE_2D, blanktex);
     }
     glUniform2f(locOffset, x, y);
     glUniform2f(locSize, glyph->w - left - right, glyph->h - top - bottom);

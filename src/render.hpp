@@ -1,7 +1,5 @@
-#ifndef TALEWEAVER_RENDER_H
-#define TALEWEAVER_RENDER_H
-
-#include <glad/gl.h>
+#pragma once
+#include "gl.hpp"
 
 typedef struct _RenderGlyph {
     GLuint tex;
@@ -21,5 +19,3 @@ void renderInitGlyph(RenderGlyph *glyph);
 void renderPrepare(int width, int height);
 void renderGlyph(RenderGlyph *glyph, float x, float y);
 void renderGlyphCropped(RenderGlyph *glyph, float x, float y, float left, float top, float right, float bottom);
-
-#endif

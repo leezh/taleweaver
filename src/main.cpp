@@ -67,3 +67,14 @@ int main(int argc, const char *argv[]) {
 
     return 0;
 }
+
+#ifdef USE_JNI
+
+#include <jni.h>
+extern "C" JNIEXPORT jint JNICALL
+Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) {
+    const char* name = "taleweaver";
+    return main(0, &name);
+}
+
+#endif
