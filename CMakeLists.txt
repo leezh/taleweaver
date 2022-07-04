@@ -65,6 +65,7 @@ target_sources(${PROJECT_NAME} PRIVATE
   src/core/window.cpp
   src/components/spatial.hpp
   src/components/camera.hpp
+  src/components/camera.cpp
   src/components/heightmap.hpp
   src/components/heightmap.cpp
   src/components/render.hpp

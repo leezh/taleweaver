@@ -1,17 +1,28 @@
 #pragma once
-#include <glm/ext/matrix_clip_space.hpp>
-#include "spatial.hpp"
+#include <glm/ext/vector_float3.hpp>
+#include <glm/ext/matrix_float4x4.hpp>
+#include <entt/entt.hpp>
 
-struct Camera : public Spatial {
+struct Camera {
     float fov = 45.f;
     float near = 0.01f;
     float far = 4000.f;
+};
 
-    glm::mat4 get_projection(float width, float height) {
-        return glm::perspective(glm::radians(fov), width / height, near, far);
-    }
+class CameraSystem {
+    private:
+        entt::registry &registry;
+        entt::entity active_camera;
+        float width;
+        float height;
 
-    glm::mat4 get_view(float width, float height) {
-        return get_projection(width, height) * glm::inverse(transform);
-    }
+    public:
+        CameraSystem(entt::registry &registry);
+        void set_active(entt::entity entity);
+        void set_viewport(float width, float height);
+        entt::entity get_active();
+        Camera get_camera();
+        glm::vec3 get_position();
+        glm::mat4 get_projection();
+        glm::mat4 get_view();
 };

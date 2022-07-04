@@ -1,5 +1,6 @@
 #define GLM_FORCE_SWIZZLE
 #include <iostream>
+#include <entt/entt.hpp>
 #include "core/window.hpp"
 #include "components/heightmap.hpp"
 #include "components/spatial.hpp"
@@ -18,6 +19,14 @@ extern "C" JNIEXPORT jint JNICALL
 Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) {
 #endif
     auto gameWindow = GameWindow();
+    auto registry = entt::registry();
+
+    auto camera = CameraSystem(registry);
+    camera.set_active(registry.create());
+
+    HeightmapSystem mapRender;
+    Heightmap map;
+    map.loadFromMemory(heightmap_data, sizeof(heightmap_data), -100.f, 100.f);
 
     gameWindow.onEvent.emplace_back([&](const SDL_Event &event){
         if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
@@ -27,7 +36,6 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
         return false;
     });
 
-    Camera camera;
     gameWindow.onUpdate.emplace_back([&](float delta){
         auto input = glm::vec3(0.f, 0.f, 0.f);
         auto turn = 0.f;
@@ -40,18 +48,16 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
         if (state[SDL_GetScancodeFromKey(SDLK_e)]) input.y += 1.f;
         if (glm::length(input) > 1.f) input = glm::normalize(input);
 
-        input = glm::mat3(camera.transform) * input;
-        camera.translate(input);
-        camera.rotate_y(glm::radians(turn * delta));
+        auto spatial = registry.get<Spatial>(camera.get_active());
+        input = glm::mat3(spatial.transform) * input;
+        spatial.translate(input);
+        spatial.rotate_y(glm::radians(turn * delta));
+        registry.replace<Spatial>(camera.get_active(), spatial);
     });
 
-    HeightmapSystem mapRender;
-    Heightmap map;
-    map.loadFromMemory(heightmap_data, sizeof(heightmap_data), -100.f, 100.f);
-
     gameWindow.onRender.emplace_back([&](int width, int height){
-        auto view = camera.get_view((float)width, (float)height);
-        mapRender.render(map, view, camera.get_offset(), 4000.f);
+        camera.set_viewport(width, height);
+        mapRender.render(map, camera);
     });
 
     gameWindow.run();

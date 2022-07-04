@@ -4,6 +4,7 @@
 #include <glm/ext/matrix_float4x4.hpp>
 #include "core/gl.hpp"
 #include "core/window.hpp"
+#include "components/camera.hpp"
 
 class Heightmap {
     private:
@@ -41,5 +42,5 @@ class HeightmapSystem {
     public:
         HeightmapSystem(unsigned int detail = 7);
         ~HeightmapSystem();
-        void render(const Heightmap& heightmap, glm::mat4x4 view, glm::vec3 center, float renderDistance);
+        void render(const Heightmap& heightmap, CameraSystem &viewport);
 };

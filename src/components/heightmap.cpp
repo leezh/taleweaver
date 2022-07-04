@@ -188,16 +188,19 @@ HeightmapSystem::~HeightmapSystem() {
     glDeleteProgram(program);
 }
 
-void HeightmapSystem::render(const Heightmap& heightmap, glm::mat4x4 view, glm::vec3 center, float renderDistance) {
+void HeightmapSystem::render(const Heightmap& heightmap, CameraSystem &viewport) {
     float chunkSize = (float)(1 << detail);
     float halfChunk = chunkSize / 2.f;
+
+    auto center = viewport.get_position();
     center.y = 0.f;
     center.x = glm::round(center.x / halfChunk) * halfChunk;
     center.z = glm::round(center.z / halfChunk) * halfChunk;
+
     auto size = glm::vec2(heightmap.width, heightmap.height);
     auto texScale = chunkSize / size;
     auto texOffset = glm::vec2(center.x, center.z) / size;
-    auto xform = glm::translate(view, center);
+    auto xform = glm::translate(viewport.get_view(), center);
     xform = glm::scale(xform, glm::vec3(chunkSize, 1.f, chunkSize));
 
     glEnable(GL_DEPTH_TEST);
@@ -214,7 +217,8 @@ void HeightmapSystem::render(const Heightmap& heightmap, glm::mat4x4 view, glm::
     void *bufferOffset = 0;
     GLfloat scale = 1.f;
     float dist = chunkSize / 4.f;
-    while (dist < renderDistance) {
+    auto camera = viewport.get_camera();
+    while (dist < camera.far) {
         glUniform2f(locScale, scale, scale);
         glDrawElements(GL_TRIANGLES, bufferCount, GL_UNSIGNED_INT, bufferOffset);
 
