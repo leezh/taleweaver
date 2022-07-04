@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.18)
 project(taleweaver C CXX)
 
+option(USE_GLES "Force the use of OpenGL ES")
+
 if(NOT ANDROID)
   add_executable(${PROJECT_NAME})
 else()
@@ -29,7 +31,7 @@ target_link_libraries(${PROJECT_NAME} glm::glm)
 target_include_directories(${PROJECT_NAME} PRIVATE "extlib/stb")
 
 add_subdirectory("extlib/glad/cmake" glad_cmake EXCLUDE_FROM_ALL)
-if(NOT ANDROID)
+if(NOT ANDROID AND NOT USE_GLES)
   glad_add_library(glad REPRODUCIBLE API gl:core=3.3)
 else()
   glad_add_library(glad REPRODUCIBLE API gles2=3.0)
