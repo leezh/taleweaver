@@ -59,20 +59,19 @@ target_sources(${PROJECT_NAME} PRIVATE
   shaders/render.frag
   shaders/heightmap.vert
   shaders/heightmap.frag
-  src/spatial.hpp
-  src/camera.hpp
-  src/window.hpp
-  src/window.cpp
+  src/core/gl.hpp
+  src/core/gl.cpp
+  src/core/window.hpp
+  src/core/window.cpp
+  src/components/spatial.hpp
+  src/components/camera.hpp
+  src/components/heightmap.hpp
+  src/components/heightmap.cpp
+  src/components/render.hpp
+  src/components/render.cpp
   src/main.cpp
-  src/render.hpp
-  src/render.cpp
-  src/shader.hpp
-  src/shader.cpp
-  src/textures.hpp
-  src/textures.cpp
-  src/heightmap.hpp
-  src/heightmap.cpp
 )
+target_include_directories(${PROJECT_NAME} PRIVATE "src")
 
 # == Compiled-in Resources ==
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/resource")

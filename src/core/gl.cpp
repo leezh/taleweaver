@@ -1,7 +1,7 @@
+#include "gl.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL_log.h>
-#include "shader.hpp"
 
 #ifndef USE_GLES
 static const GLchar* shaderHeader = "#version 330 core\n";

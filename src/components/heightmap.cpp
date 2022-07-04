@@ -1,7 +1,6 @@
 #include "heightmap.hpp"
 #include <glm/ext/matrix_transform.hpp>
 #include <stb_image.h>
-#include "shader.hpp"
 
 static const GLchar vertex[] = {
 #include "shaders/heightmap.vert.cstr"
@@ -10,13 +9,8 @@ static const GLchar fragment[] = {
 #include "shaders/heightmap.frag.cstr"
 };
 
-Heightmap::Heightmap(unsigned int detail):
-    detail(detail),
-    loadedGL(false) {
-}
-
 Heightmap::~Heightmap() {
-    if (loadedGL) quitGL();
+    if (texture) glDeleteTextures(1, &texture);
 }
 
 bool Heightmap::loadFromImage(const char *path, float min, float max) {
@@ -33,6 +27,7 @@ bool Heightmap::loadFromImage(const char *path, float min, float max) {
         p = &p[1];
     }
     stbi_image_free(image);
+    upload();
     return true;
 }
 
@@ -50,10 +45,20 @@ bool Heightmap::loadFromMemory(const unsigned char *buffer, int length, float mi
         p = &p[1];
     }
     stbi_image_free(image);
+    upload();
     return true;
 }
 
-void Heightmap::initGL() {
+void Heightmap::upload() {
+    if (!texture) glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, width, height, 0, GL_RGB, GL_FLOAT, &data[0]);
+    glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+HeightmapSystem::HeightmapSystem(unsigned int detail): detail(detail) {
     unsigned int length = (1 << detail);
     unsigned int triCount = (length - 1) * (length - 1) * 2;
 
@@ -168,44 +173,28 @@ void Heightmap::initGL() {
     glUseProgram(program);
     locPosition = glGetAttribLocation(program, "position");
     locTex = glGetUniformLocation(program, "tex");
-    locTexOffset = glGetUniformLocation(program, "texOffset");
-    locTexScale = glGetUniformLocation(program, "texScale");
     locXForm = glGetUniformLocation(program, "xform");
     locScale = glGetUniformLocation(program, "scale");
-    locOffset = glGetUniformLocation(program, "offset");
+    locTexOffset = glGetUniformLocation(program, "texOffset");
+    locTexScale = glGetUniformLocation(program, "texScale");
     glEnableVertexAttribArray(locPosition);
     glVertexAttribPointer(locPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-    glGenTextures(1, &texture);
-
-    loadedGL = true;
 }
 
-void Heightmap::quitGL() {
+HeightmapSystem::~HeightmapSystem() {
     glDeleteBuffers(1, &ebo);
     glDeleteBuffers(1, &vbo);
     glDeleteVertexArrays(1, &vao);
     glDeleteProgram(program);
-    glDeleteTextures(1, &texture);
-    loadedGL = false;
 }
 
-void Heightmap::upload() {
-    if (!loadedGL) initGL();
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, width, height, 0, GL_RGB, GL_FLOAT, &data[0]);
-    glGenerateMipmap(GL_TEXTURE_2D);
-}
-
-void Heightmap::render(glm::mat4x4 view, glm::vec3 center, float renderDistance) {
+void HeightmapSystem::render(const Heightmap& heightmap, glm::mat4x4 view, glm::vec3 center, float renderDistance) {
     float chunkSize = (float)(1 << detail);
     float halfChunk = chunkSize / 2.f;
     center.y = 0.f;
     center.x = glm::round(center.x / halfChunk) * halfChunk;
     center.z = glm::round(center.z / halfChunk) * halfChunk;
-    auto size = glm::vec2(width, height);
+    auto size = glm::vec2(heightmap.width, heightmap.height);
     auto texScale = chunkSize / size;
     auto texOffset = glm::vec2(center.x, center.z) / size;
     auto xform = glm::translate(view, center);
@@ -214,7 +203,7 @@ void Heightmap::render(glm::mat4x4 view, glm::vec3 center, float renderDistance)
     glEnable(GL_DEPTH_TEST);
     glUseProgram(program);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, heightmap.texture);
     glBindVertexArray(vao);
     glUniform1i(locTex, 0);
     glUniform2f(locTexScale, texScale.x, texScale.y);

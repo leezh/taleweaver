@@ -1,44 +1,34 @@
 #define GLM_FORCE_SWIZZLE
 #include <iostream>
-#include <glm/trigonometric.hpp>
-#include "window.hpp"
-#include "render.hpp"
-#include "spatial.hpp"
-#include "camera.hpp"
-#include "heightmap.hpp"
+#include "core/window.hpp"
+#include "components/heightmap.hpp"
+#include "components/spatial.hpp"
+#include "components/camera.hpp"
 
-static const unsigned char heightmap[] = {
+static const unsigned char heightmap_data[] = {
 #include "images/heightmap.png.hex"
 };
 
+
+#ifndef USE_JNI
 int main(int argc, const char *argv[]) {
+#else
+#include <jni.h>
+extern "C" JNIEXPORT jint JNICALL
+Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) {
+#endif
     auto gameWindow = GameWindow();
-    bool running = true;
 
-    auto camera = Camera();
-    auto map = Heightmap(6);
-
-    map.loadFromMemory(heightmap, sizeof(heightmap), -100.f, 100.f);
-    map.upload();
-
-    Uint64 elapsedTicks = SDL_GetTicks64();
-    while (running) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE) {
-                running = false;
-                break;
-            }
-            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-                running = false;
-                break;
-            }
+    gameWindow.onEvent.emplace_back([&](const SDL_Event &event){
+        if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+            gameWindow.stop();
+            return true;
         }
+        return false;
+    });
 
-        Uint64 previousTicks = elapsedTicks;
-        elapsedTicks = SDL_GetTicks64();
-        float delta = (float)(elapsedTicks - previousTicks) / 1000.f;
-
+    Camera camera;
+    gameWindow.onUpdate.emplace_back([&](float delta){
         auto input = glm::vec3(0.f, 0.f, 0.f);
         auto turn = 0.f;
         const Uint8 *state = SDL_GetKeyboardState(nullptr);
@@ -53,28 +43,17 @@ int main(int argc, const char *argv[]) {
         input = glm::mat3(camera.transform) * input;
         camera.translate(input);
         camera.rotate_y(glm::radians(turn * delta));
+    });
 
-        int width, height;
-        SDL_GL_GetDrawableSize(gameWindow, &width, &height);
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        auto view = camera.get_view(width, height);
+    HeightmapSystem mapRender;
+    Heightmap map;
+    map.loadFromMemory(heightmap_data, sizeof(heightmap_data), -100.f, 100.f);
 
-        map.render(view, camera.get_offset(), 4000.f);
+    gameWindow.onRender.emplace_back([&](int width, int height){
+        auto view = camera.get_view((float)width, (float)height);
+        mapRender.render(map, view, camera.get_offset(), 4000.f);
+    });
 
-        SDL_GL_SwapWindow(gameWindow);
-    }
-
+    gameWindow.run();
     return 0;
 }
-
-#ifdef USE_JNI
-
-#include <jni.h>
-extern "C" JNIEXPORT jint JNICALL
-Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) {
-    const char* name = "taleweaver";
-    return main(0, &name);
-}
-
-#endif

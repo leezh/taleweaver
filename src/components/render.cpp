@@ -1,5 +1,4 @@
 #include "render.hpp"
-#include "shader.hpp"
 
 static GLuint program = 0;
 static const GLchar vertex[] = {

@@ -1,11 +1,10 @@
 #include "window.hpp"
-#include "gl.hpp"
+#include "core/gl.hpp"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 GameWindow::GameWindow() {
-    window = nullptr;
-    context = nullptr;
-    loaded = false;
-
     Uint32 initFlags = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER;
     if (SDL_Init(initFlags)) {
         SDL_LogError(0, "%s", SDL_GetError());
@@ -50,10 +49,43 @@ GameWindow::~GameWindow() {
     }
 }
 
-GameWindow::operator bool() {
-    return loaded;
+void GameWindow::run() {
+    running = true;
+    Uint64 elapsedTicks = SDL_GetTicks64();
+    while (loaded && running) {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE) {
+                running = false;
+                break;
+            }
+
+            for (auto callback : onEvent) {
+                if (callback(event)) break;
+            }
+        }
+
+        Uint64 previousTicks = elapsedTicks;
+        elapsedTicks = SDL_GetTicks64();
+        float delta = (float)(elapsedTicks - previousTicks) / 1000.f;
+
+        for (auto callback : onUpdate) {
+            callback(delta);
+        }
+
+        int width, height;
+        SDL_GL_GetDrawableSize(window, &width, &height);
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        for (auto callback : onRender) {
+            callback(width, height);
+        }
+
+        SDL_GL_SwapWindow(window);
+    }
 }
 
-GameWindow::operator SDL_Window*() {
-    return window;
+void GameWindow::stop() {
+    running = false;
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "gl.hpp"
+#include "core/gl.hpp"
 
 typedef struct _RenderGlyph {
     GLuint tex;
