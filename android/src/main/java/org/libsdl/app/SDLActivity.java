@@ -1,5 +1,6 @@
 package org.libsdl.app;
 
+import net.leezh.taleweaver.MainActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -53,7 +54,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import net.leezh.taleweaver.MainActivity;
 
 import java.util.Hashtable;
 import java.util.Locale;
