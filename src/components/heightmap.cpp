@@ -19,12 +19,12 @@ bool Heightmap::loadFromImage(const char *path, float min, float max) {
     if (image == nullptr) {
         return false;
     }
-    data.resize(width * height * 3, 0);
-    auto p = &image[0];
+    data.resize(width * height);
+    auto pixel = &image[0];
     for (auto &i : data) {
-        i = (float)*p / 255.f;
-        i = i * i * (max - min) + min;
-        p = &p[1];
+        i.r = (float)(*pixel++) / 255.f  * (max - min) + min;
+        i.g = (float)(*pixel++) / 255.f;
+        i.b = (float)(*pixel++) / 255.f;
     }
     stbi_image_free(image);
     upload();
@@ -37,12 +37,12 @@ bool Heightmap::loadFromMemory(const unsigned char *buffer, int length, float mi
     if (image == nullptr) {
         return false;
     }
-    data.resize(width * height * 3, 0);
-    auto p = &image[0];
+    data.resize(width * height);
+    auto pixel = &image[0];
     for (auto &i : data) {
-        i = (float)*p / 255.f;
-        i = i * i * (max - min) + min;
-        p = &p[1];
+        i.r = (float)(*pixel++) / 255.f  * (max - min) + min;
+        i.g = (float)(*pixel++) / 255.f;
+        i.b = (float)(*pixel++) / 255.f;
     }
     stbi_image_free(image);
     upload();
@@ -52,118 +52,131 @@ bool Heightmap::loadFromMemory(const unsigned char *buffer, int length, float mi
 void Heightmap::upload() {
     if (!texture) glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, width, height, 0, GL_RGB, GL_FLOAT, &data[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, &data[0]);
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 HeightmapSystem::HeightmapSystem(unsigned int detail): detail(detail) {
-    unsigned int length = (1 << detail);
-    unsigned int triCount = (length - 1) * (length - 1) * 2;
+    unsigned int tileLength = (1 << detail);
+    unsigned int stitchLength = tileLength >> 1;
 
-    unsigned int edgeLength = length >> 1;
-    unsigned int edgeIndexOffset = length * length;
-    unsigned int edgeTriCount = edgeLength * 2 * 3 - 2;
+    std::vector<glm::vec2> points;
+    points.reserve(tileLength * tileLength + stitchLength * 4);
 
-    indexCount = (triCount + edgeTriCount) * 3;
-    borderIndexCount = indexCount - edgeLength * edgeLength * 6;
-    borderOffset = (void *)(edgeLength * edgeLength * 6 * sizeof(GLfloat));
+    std::vector<GLuint> indices;
+    unsigned int tileTriangles = (tileLength - 1) * (tileLength - 1) * 2;
+    unsigned int stitchTriangles = stitchLength * 2 * 3 - 2;
+    indices.reserve((tileTriangles + stitchTriangles) * 3);
 
-    unsigned int pointSize = (length * length + edgeLength * 4) * 2 * sizeof(GLfloat);
-    GLfloat points[pointSize];
-    GLfloat *p = points;
-
-    unsigned int indexSize = indexCount * sizeof(GLuint);
-    GLuint indices[indexSize];
-    GLuint *ci = indices;
-    GLuint *i = &indices[edgeLength * edgeLength * 6];
-
-    for (int x = 0; x < length; x++) {
-        for (int y = 0; y < length; y++) {
-            *(p++) = (GLfloat)(x) / length / 2;
-            *(p++) = (GLfloat)(y) / length / 2;
-            int p1 = (x + 0) * length + (y + 0);
-            int p2 = (x + 1) * length + (y + 0);
-            int p3 = (x + 1) * length + (y + 1);
-            int p4 = (x + 0) * length + (y + 1);
-            if (x < edgeLength && y < edgeLength) {
-                *(ci++) = p1;
-                *(ci++) = p2;
-                *(ci++) = p4;
-                *(ci++) = p2;
-                *(ci++) = p3;
-                *(ci++) = p4;
-            } else if (x < length - 1 && y < length - 1) {
-                *(i++) = p1;
-                *(i++) = p2;
-                *(i++) = p4;
-                *(i++) = p2;
-                *(i++) = p3;
-                *(i++) = p4;
-            }
+    for (int x = 0; x < tileLength; x++) {
+        for (int y = 0; y < tileLength; y++) {
+            points.emplace_back(glm::vec2((float)x, (float)y) / (float)tileLength);
+        }
+    }
+    for (int x = 0; x < stitchLength; x++) {
+        for (int y = 0; y < stitchLength; y++) {
+            int p1 = (x + 0) * tileLength + (y + 0);
+            int p2 = (x + 1) * tileLength + (y + 0);
+            int p3 = (x + 1) * tileLength + (y + 1);
+            int p4 = (x + 0) * tileLength + (y + 1);
+            indices.emplace_back(p1);
+            indices.emplace_back(p2);
+            indices.emplace_back(p4);
+            indices.emplace_back(p2);
+            indices.emplace_back(p3);
+            indices.emplace_back(p4);
+        }
+    }
+    for (int x = 0; x < tileLength - 1; x++) {
+        for (int y = 0; y < tileLength - 1; y++) {
+            if (x < stitchLength && y < stitchLength) continue;
+            int p1 = (x + 0) * tileLength + (y + 0);
+            int p2 = (x + 1) * tileLength + (y + 0);
+            int p3 = (x + 1) * tileLength + (y + 1);
+            int p4 = (x + 0) * tileLength + (y + 1);
+            indices.emplace_back(p1);
+            indices.emplace_back(p2);
+            indices.emplace_back(p4);
+            indices.emplace_back(p2);
+            indices.emplace_back(p3);
+            indices.emplace_back(p4);
         }
     }
 
-    for (int j = 0; j < edgeLength; j++) {
-        int x = length - 1;
+    for (int j = 0; j < stitchLength; j++) {
+        float x = tileLength;
+        float y = j * 2;
+        points.emplace_back(glm::vec2(x, y) / (float)tileLength);
+        points.emplace_back(glm::vec2(x, y + 2) / (float)tileLength);
+    }
+    for (int j = 0; j < stitchLength; j++) {
+        int x = tileLength - 1;
         int y = j * 2;
-        *(p++) = (GLfloat)(x + 1) / length / 2;
-        *(p++) = (GLfloat)(y + 0) / length / 2;
-        *(p++) = (GLfloat)(x + 1) / length / 2;
-        *(p++) = (GLfloat)(y + 2) / length / 2;
-        int p1 = (x + 0) * length + (y + 0);
-        int p2 = edgeIndexOffset + j * 2;
-        int p3 = edgeIndexOffset + j * 2 + 1;
-        int p4 = (x + 0) * length + (y + 1);
-        int p5 = (x + 0) * length + (y + 2);
-        *(i++) = p1;
-        *(i++) = p2;
-        *(i++) = p4;
-        *(i++) = p2;
-        *(i++) = p3;
-        *(i++) = p4;
-        if (j < edgeLength - 1) {
-            *(i++) = p4;
-            *(i++) = p3;
-            *(i++) = p5;
+        int offset = tileLength * tileLength;
+        int p1 = (x + 0) * tileLength + (y + 0);
+        int p2 = offset + j * 2;
+        int p3 = offset + j * 2 + 1;
+        int p4 = (x + 0) * tileLength + (y + 1);
+        int p5 = (x + 0) * tileLength + (y + 2);
+        indices.emplace_back(p1);
+        indices.emplace_back(p2);
+        indices.emplace_back(p4);
+        indices.emplace_back(p2);
+        indices.emplace_back(p3);
+        indices.emplace_back(p4);
+        if (j < stitchLength - 1) {
+            indices.emplace_back(p4);
+            indices.emplace_back(p3);
+            indices.emplace_back(p5);
         }
     }
-    for (int j = 0; j < edgeLength; j++) {
+
+    for (int j = 0; j < stitchLength; j++) {
+        float x = j * 2;
+        float y = tileLength;
+        points.emplace_back(glm::vec2(x + 2, y) / (float)tileLength);
+        points.emplace_back(glm::vec2(x, y) / (float)tileLength);
+    }
+    for (int j = 0; j < stitchLength; j++) {
         int x = j * 2;
-        int y = length - 1;
-        *(p++) = (GLfloat)(x + 2) / length / 2;
-        *(p++) = (GLfloat)(y + 1) / length / 2;
-        *(p++) = (GLfloat)(x + 0) / length / 2;
-        *(p++) = (GLfloat)(y + 1) / length / 2;
-        int p1 = (x + 0) * length + (y + 0);
-        int p2 = (x + 1) * length + (y + 0);
-        int p3 = edgeIndexOffset + edgeLength * 2 + j * 2;
-        int p4 = edgeIndexOffset + edgeLength * 2 + j * 2 + 1;
-        int p5 = (x + 2) * length + (y + 0);
-        *(i++) = p1;
-        *(i++) = p2;
-        *(i++) = p4;
-        *(i++) = p2;
-        *(i++) = p3;
-        *(i++) = p4;
-        if (j < edgeLength - 1) {
-            *(i++) = p3;
-            *(i++) = p2;
-            *(i++) = p5;
+        int y = tileLength - 1;
+        int offset = tileLength * tileLength + stitchLength * 2;
+        int p1 = (x + 0) * tileLength + (y + 0);
+        int p2 = (x + 1) * tileLength + (y + 0);
+        int p3 = offset + j * 2;
+        int p4 = offset + j * 2 + 1;
+        int p5 = (x + 2) * tileLength + (y + 0);
+        indices.emplace_back(p1);
+        indices.emplace_back(p2);
+        indices.emplace_back(p4);
+        indices.emplace_back(p2);
+        indices.emplace_back(p3);
+        indices.emplace_back(p4);
+        if (j < stitchLength - 1) {
+            indices.emplace_back(p3);
+            indices.emplace_back(p2);
+            indices.emplace_back(p5);
         }
     }
+
+    indexCount = indices.size();
+    stitchIndexOffset = (void*)(stitchLength * stitchLength * 6 * sizeof(GLuint));
+    stitchIndexCount = indexCount - stitchLength * stitchLength * 6;
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, pointSize, points, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec3), &points[0], GL_STATIC_DRAW);
 
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize, indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
 
     ShaderCompiler compiler;
     compiler.compileStage(GL_VERTEX_SHADER, vertex);
@@ -192,6 +205,7 @@ void HeightmapSystem::render(const Heightmap& heightmap, CameraSystem &viewport)
     float chunkSize = (float)(1 << detail);
     float halfChunk = chunkSize / 2.f;
 
+    auto camera = viewport.get_camera();
     auto center = viewport.get_position();
     center.y = 0.f;
     center.x = glm::round(center.x / halfChunk) * halfChunk;
@@ -215,10 +229,7 @@ void HeightmapSystem::render(const Heightmap& heightmap, CameraSystem &viewport)
 
     unsigned int bufferCount = indexCount;
     void *bufferOffset = 0;
-    GLfloat scale = 1.f;
-    float dist = chunkSize / 4.f;
-    auto camera = viewport.get_camera();
-    while (dist < camera.far) {
+    for (float scale = 1.f; chunkSize * scale / 4 < camera.far; scale *= 2) {
         glUniform2f(locScale, scale, scale);
         glDrawElements(GL_TRIANGLES, bufferCount, GL_UNSIGNED_INT, bufferOffset);
 
@@ -231,9 +242,7 @@ void HeightmapSystem::render(const Heightmap& heightmap, CameraSystem &viewport)
         glUniform2f(locScale, -scale, scale);
         glDrawElements(GL_TRIANGLES, bufferCount, GL_UNSIGNED_INT, bufferOffset);
 
-        bufferCount = borderIndexCount;
-        bufferOffset = borderOffset;
-        dist *= 2;
-        scale *= 2.f;
+        bufferCount = stitchIndexCount;
+        bufferOffset = stitchIndexOffset;
     }
 }

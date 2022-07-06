@@ -8,7 +8,7 @@
 
 class Heightmap {
     private:
-        std::vector<float> data;
+        std::vector<glm::vec3> data;
         int width;
         int height;
         GLuint texture = 0;
@@ -24,20 +24,21 @@ class Heightmap {
 
 class HeightmapSystem {
     private:
-        unsigned int detail;
         GLuint program;
-        GLuint vao;
-        GLuint vbo;
-        GLuint ebo;
         GLint locPosition;
         GLint locTex;
         GLint locXForm;
         GLint locScale;
         GLint locTexOffset;
         GLint locTexScale;
+
+        unsigned int detail;
+        GLuint vao;
+        GLuint vbo;
+        GLuint ebo;
         unsigned int indexCount;
-        unsigned int borderIndexCount;
-        void *borderOffset;
+        unsigned int stitchIndexCount;
+        void *stitchIndexOffset;
 
     public:
         HeightmapSystem(unsigned int detail = 7);
