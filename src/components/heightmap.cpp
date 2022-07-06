@@ -13,7 +13,25 @@ Heightmap::~Heightmap() {
     if (texture) glDeleteTextures(1, &texture);
 }
 
-bool Heightmap::loadFromImage(const char *path, float min, float max) {
+glm::vec3 &Heightmap::at(int x, int y) {
+    return data[x + y * width];
+}
+
+int Heightmap::get_width() {
+    return width;
+}
+
+int Heightmap::get_height() {
+    return height;
+}
+
+void Heightmap::resize(int new_width, int new_height) {
+    width = new_width;
+    height = new_height;
+    data.resize(width * height);
+}
+
+bool Heightmap::loadFromImageFile(const char *path, float min, float max) {
     int n;
     auto image = stbi_load(path, &width, &height, &n, 3);
     if (image == nullptr) {
@@ -31,7 +49,7 @@ bool Heightmap::loadFromImage(const char *path, float min, float max) {
     return true;
 }
 
-bool Heightmap::loadFromMemory(const unsigned char *buffer, int length, float min, float max) {
+bool Heightmap::loadFromImageBuffer(const unsigned char *buffer, int length, float min, float max) {
     int n;
     auto image = stbi_load_from_memory(buffer, length, &width, &height, &n, 3);
     if (image == nullptr) {
@@ -50,14 +68,14 @@ bool Heightmap::loadFromMemory(const unsigned char *buffer, int length, float mi
 }
 
 void Heightmap::upload() {
-    if (!texture) glGenTextures(1, &texture);
+    if (texture) glDeleteTextures(1, &texture);
+    glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, &data[0]);
-    glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 HeightmapSystem::HeightmapSystem(unsigned int detail): detail(detail) {
@@ -91,6 +109,9 @@ HeightmapSystem::HeightmapSystem(unsigned int detail): detail(detail) {
             indices.emplace_back(p4);
         }
     }
+
+    stitchIndexOffset = indices.size();
+
     for (int x = 0; x < tileLength - 1; x++) {
         for (int y = 0; y < tileLength - 1; y++) {
             if (x < stitchLength && y < stitchLength) continue;
@@ -164,11 +185,7 @@ HeightmapSystem::HeightmapSystem(unsigned int detail): detail(detail) {
     }
 
     indexCount = indices.size();
-    stitchIndexOffset = (void*)(stitchLength * stitchLength * 6 * sizeof(GLuint));
-    stitchIndexCount = indexCount - stitchLength * stitchLength * 6;
-
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    stitchIndexCount = indexCount - stitchIndexOffset;
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -213,7 +230,7 @@ void HeightmapSystem::render(const Heightmap& heightmap, CameraSystem &viewport)
 
     auto size = glm::vec2(heightmap.width, heightmap.height);
     auto texScale = chunkSize / size;
-    auto texOffset = glm::vec2(center.x, center.z) / size;
+    auto texOffset = glm::vec2(center.x + .5f, center.z + .5f) / size + glm::vec2(.5f);
     auto xform = glm::translate(viewport.get_view(), center);
     xform = glm::scale(xform, glm::vec3(chunkSize, 1.f, chunkSize));
 
@@ -243,6 +260,6 @@ void HeightmapSystem::render(const Heightmap& heightmap, CameraSystem &viewport)
         glDrawElements(GL_TRIANGLES, bufferCount, GL_UNSIGNED_INT, bufferOffset);
 
         bufferCount = stitchIndexCount;
-        bufferOffset = stitchIndexOffset;
+        bufferOffset = (void*)(stitchIndexOffset * sizeof(GLuint));
     }
 }

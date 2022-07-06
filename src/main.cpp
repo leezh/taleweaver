@@ -26,7 +26,17 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
 
     HeightmapSystem mapRender;
     Heightmap map;
-    map.loadFromMemory(heightmap_data, sizeof(heightmap_data), -100.f, 100.f);
+    map.loadFromImageBuffer(heightmap_data, sizeof(heightmap_data), -100.f, 100.f);
+
+    for (int x = 0; x < map.get_width(); x++) {
+        map.at(x, 0) = glm::vec3(0);
+        map.at(x, map.get_height() - 1) = glm::vec3(0);
+    }
+    for (int y = 0; y < map.get_height(); y++) {
+        map.at(0, y) = glm::vec3(0);
+        map.at(map.get_width() - 1, y) = glm::vec3(0);
+    }
+    map.upload();
 
     gameWindow.onEvent.emplace_back([&](const SDL_Event &event){
         if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {

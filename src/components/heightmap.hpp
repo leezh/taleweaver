@@ -15,8 +15,12 @@ class Heightmap {
 
     public:
         ~Heightmap();
-        bool loadFromImage(const char *path, float min, float max);
-        bool loadFromMemory(const unsigned char *buffer, int length, float min, float max);
+        int get_width();
+        int get_height();
+        glm::vec3 &at(int x, int y);
+        void resize(int new_width, int new_height);
+        bool loadFromImageFile(const char *path, float min, float max);
+        bool loadFromImageBuffer(const unsigned char *buffer, int length, float min, float max);
         void upload();
 
         friend class HeightmapSystem;
@@ -38,7 +42,7 @@ class HeightmapSystem {
         GLuint ebo;
         unsigned int indexCount;
         unsigned int stitchIndexCount;
-        void *stitchIndexOffset;
+        unsigned int stitchIndexOffset;
 
     public:
         HeightmapSystem(unsigned int detail = 7);

@@ -9,7 +9,7 @@ uniform sampler2D tex;
 
 void main() {
     vec2 p = scale * position;
-    uv = p * texScale + texOffset + vec2(0.5, 0.5);
+    uv = p * texScale + texOffset;
     height = texture(tex, uv).r;
     gl_Position = xform * vec4(p.x, height, p.y, 1.0);
 }
