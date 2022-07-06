@@ -38,16 +38,34 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
     }
     map.upload();
 
+    bool dragEnable;
+    int dragStartX;
+    int dragStartY;
+    glm::vec3 dragInput;
+
     gameWindow.onEvent.emplace_back([&](const SDL_Event &event){
         if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
             gameWindow.stop();
             return true;
         }
+        if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == 1) {
+            dragEnable = true;
+            dragStartX = event.button.x;
+            dragStartY = event.button.y;
+        }
+        if (event.type == SDL_MOUSEBUTTONUP && event.button.button == 1) {
+            dragEnable = false;
+            dragInput = glm::vec3(0);
+        }
+        if (event.type == SDL_MOUSEMOTION && dragEnable) {
+            dragInput.x = event.motion.x - dragStartX;
+            dragInput.z = event.motion.y - dragStartY;
+        }
         return false;
     });
 
     gameWindow.onUpdate.emplace_back([&](float delta){
-        auto input = glm::vec3(0.f, 0.f, 0.f);
+        auto input = glm::vec3(0.f, 0.f, 0.f) + dragInput;
         auto turn = 0.f;
         const Uint8 *state = SDL_GetKeyboardState(nullptr);
         if (state[SDL_GetScancodeFromKey(SDLK_w)]) input.z -= 1.f;
