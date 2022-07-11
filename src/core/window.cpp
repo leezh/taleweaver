@@ -5,8 +5,8 @@
 #include <stb_image.h>
 
 GameWindow::GameWindow() {
-    Uint32 initFlags = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER;
-    if (SDL_Init(initFlags)) {
+    Uint32 init_flags = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER;
+    if (SDL_Init(init_flags)) {
         SDL_LogError(0, "%s", SDL_GetError());
         return;
     }
@@ -14,13 +14,13 @@ GameWindow::GameWindow() {
     SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 
     int pos = SDL_WINDOWPOS_UNDEFINED;
-    Uint32 windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+    Uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 
 #ifdef USE_JNI
-    windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+    window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 #endif
 
-    window = SDL_CreateWindow("Taleweaver", pos, pos, 1280, 720, windowFlags);
+    window = SDL_CreateWindow("Taleweaver", pos, pos, 1280, 720, window_flags);
     if (!window) {
         SDL_LogError(0, "%s", SDL_GetError());
         SDL_Quit();
@@ -65,7 +65,7 @@ GameWindow::~GameWindow() {
 
 void GameWindow::run() {
     running = true;
-    Uint64 elapsedTicks = SDL_GetTicks64();
+    Uint64 ticks = SDL_GetTicks64();
     while (loaded && running) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -74,16 +74,16 @@ void GameWindow::run() {
                 break;
             }
 
-            for (auto callback : onEvent) {
+            for (auto callback : on_event) {
                 if (callback(event)) break;
             }
         }
 
-        Uint64 previousTicks = elapsedTicks;
-        elapsedTicks = SDL_GetTicks64();
-        float delta = (float)(elapsedTicks - previousTicks) / 1000.f;
+        Uint64 last_tick = ticks;
+        ticks = SDL_GetTicks64();
+        float delta = (float)(ticks - last_tick) / 1000.f;
 
-        for (auto callback : onUpdate) {
+        for (auto callback : on_update) {
             callback(delta);
         }
 
@@ -94,7 +94,7 @@ void GameWindow::run() {
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
 
-        for (auto callback : onRender) {
+        for (auto callback : on_render) {
             callback(width, height);
         }
 

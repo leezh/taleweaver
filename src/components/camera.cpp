@@ -127,7 +127,7 @@ void CameraSystem::render(int screen_width, int screen_height) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    for (auto callback : onRender) {
+    for (auto callback : on_render) {
         callback(width, height);
     }
 

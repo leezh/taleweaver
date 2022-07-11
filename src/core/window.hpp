@@ -11,9 +11,9 @@ class GameWindow {
         bool running = false;
 
     public:
-        std::list<std::function<bool(const SDL_Event &)>> onEvent;
-        std::list<std::function<void(float)>> onUpdate;
-        std::list<std::function<void(int, int)>> onRender;
+        std::list<std::function<bool(const SDL_Event &)>> on_event;
+        std::list<std::function<void(float)>> on_update;
+        std::list<std::function<void(int, int)>> on_render;
 
         GameWindow();
         ~GameWindow();

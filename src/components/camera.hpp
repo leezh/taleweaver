@@ -31,7 +31,7 @@ class CameraSystem {
 
     public:
         float render_scale = 1.f;
-        std::list<std::function<void(int, int)>> onRender;
+        std::list<std::function<void(int, int)>> on_render;
 
         CameraSystem(entt::registry &registry);
         ~CameraSystem();

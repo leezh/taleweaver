@@ -19,8 +19,8 @@ class Heightmap {
         int get_height();
         glm::vec3 &at(int x, int y);
         void resize(int new_width, int new_height);
-        bool loadFromImageFile(const char *path, float min, float max);
-        bool loadFromImageBuffer(const unsigned char *buffer, int length, float min, float max);
+        bool load_image_file(const char *path, float min, float max);
+        bool load_image_buffer(const unsigned char *buffer, int length, float min, float max);
         void upload();
 
         friend class HeightmapSystem;
@@ -29,20 +29,19 @@ class Heightmap {
 class HeightmapSystem {
     private:
         GLuint program;
-        GLint locPosition;
-        GLint locTex;
-        GLint locXForm;
-        GLint locScale;
-        GLint locTexOffset;
-        GLint locTexScale;
-
-        unsigned int detail;
+        GLint loc_position;
+        GLint loc_tex;
+        GLint loc_xform;
+        GLint loc_scale;
+        GLint loc_tex_offset;
+        GLint loc_tex_Scale;
         GLuint vao;
         GLuint vbo;
         GLuint ebo;
-        unsigned int indexCount;
-        unsigned int stitchIndexCount;
-        unsigned int stitchIndexOffset;
+        unsigned int chunk_length;
+        unsigned int chunk_size;
+        unsigned int stitch_size;
+        unsigned int stitch_offset;
 
     public:
         HeightmapSystem(unsigned int detail = 7);
