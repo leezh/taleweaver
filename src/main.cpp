@@ -38,10 +38,9 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
     }
     map.upload();
 
-    bool dragEnable;
-    int dragStartX;
-    int dragStartY;
-    glm::vec3 dragInput;
+    bool drag_enable = false;
+    glm::vec2 drag_start;
+    glm::vec2 drag_input;
 
     gameWindow.onEvent.emplace_back([&](const SDL_Event &event) {
         if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
@@ -49,37 +48,38 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
             return true;
         }
         if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == 1) {
-            dragEnable = true;
-            dragStartX = event.button.x;
-            dragStartY = event.button.y;
+            drag_enable = true;
+            drag_start = glm::vec2(event.button.x, event.button.y);
+            drag_input = glm::vec2(0, 0);
         }
         if (event.type == SDL_MOUSEBUTTONUP && event.button.button == 1) {
-            dragEnable = false;
-            dragInput = glm::vec3(0);
+            drag_enable = false;
         }
-        if (event.type == SDL_MOUSEMOTION && dragEnable) {
-            dragInput.x = event.motion.x - dragStartX;
-            dragInput.z = event.motion.y - dragStartY;
+        if (event.type == SDL_MOUSEMOTION && drag_enable) {
+            drag_input = glm::vec2(event.motion.x, event.motion.y) - drag_start;
         }
         return false;
     });
 
     gameWindow.onUpdate.emplace_back([&](float delta) {
-        auto input = glm::vec3(0.f, 0.f, 0.f) + dragInput;
+        auto input = glm::vec3(0.f, 0.f, 0.f);
         auto turn = 0.f;
         const Uint8 *state = SDL_GetKeyboardState(nullptr);
+        if (drag_enable) input.z += glm::round(drag_input.y / 100.f);
+        if (drag_enable) turn -= glm::round(drag_input.x / 100.f);
         if (state[SDL_GetScancodeFromKey(SDLK_w)]) input.z -= 1.f;
         if (state[SDL_GetScancodeFromKey(SDLK_s)]) input.z += 1.f;
-        if (state[SDL_GetScancodeFromKey(SDLK_a)]) turn += 50.f;
-        if (state[SDL_GetScancodeFromKey(SDLK_d)]) turn -= 50.f;
+        if (state[SDL_GetScancodeFromKey(SDLK_a)]) turn += 1.f;
+        if (state[SDL_GetScancodeFromKey(SDLK_d)]) turn -= 1.f;
         if (state[SDL_GetScancodeFromKey(SDLK_q)]) input.y -= 1.f;
         if (state[SDL_GetScancodeFromKey(SDLK_e)]) input.y += 1.f;
         if (glm::length(input) > 1.f) input = glm::normalize(input);
+        turn = glm::clamp(turn, -1.f, 1.f);
 
         auto spatial = registry.get<Spatial>(camera.get_active());
         input = glm::mat3(spatial.transform) * input;
-        spatial.translate(input);
-        spatial.rotate_y(glm::radians(turn * delta));
+        spatial.translate(input * delta * 50.f);
+        spatial.rotate_y(glm::radians(turn * delta * 50.f));
         registry.replace<Spatial>(camera.get_active(), spatial);
     });
 

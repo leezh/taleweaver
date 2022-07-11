@@ -14,7 +14,12 @@ GameWindow::GameWindow() {
     SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 
     int pos = SDL_WINDOWPOS_UNDEFINED;
-    Uint32 windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN_DESKTOP;
+    Uint32 windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+
+#ifdef USE_JNI
+    windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+#endif
+
     window = SDL_CreateWindow("Taleweaver", pos, pos, 1280, 720, windowFlags);
     if (!window) {
         SDL_LogError(0, "%s", SDL_GetError());
