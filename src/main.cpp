@@ -43,7 +43,7 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
     int dragStartY;
     glm::vec3 dragInput;
 
-    gameWindow.onEvent.emplace_back([&](const SDL_Event &event){
+    gameWindow.onEvent.emplace_back([&](const SDL_Event &event) {
         if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
             gameWindow.stop();
             return true;
@@ -64,7 +64,7 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
         return false;
     });
 
-    gameWindow.onUpdate.emplace_back([&](float delta){
+    gameWindow.onUpdate.emplace_back([&](float delta) {
         auto input = glm::vec3(0.f, 0.f, 0.f) + dragInput;
         auto turn = 0.f;
         const Uint8 *state = SDL_GetKeyboardState(nullptr);
@@ -83,8 +83,11 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
         registry.replace<Spatial>(camera.get_active(), spatial);
     });
 
-    gameWindow.onRender.emplace_back([&](int width, int height){
-        camera.set_viewport(width, height);
+    gameWindow.onRender.emplace_back([&](int width, int height) {
+        camera.render(width, height);
+    });
+
+    camera.onRender.emplace_back([&](int width, int height) {
         mapRender.render(map, camera);
     });
 

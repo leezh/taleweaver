@@ -22,8 +22,17 @@ GameWindow::GameWindow() {
         return;
     }
 
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+#ifdef USE_GLES
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#else
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#endif
+
     context = SDL_GL_CreateContext(window);
     if (!context) {
         SDL_LogError(0, "%s", SDL_GetError());
@@ -32,10 +41,10 @@ GameWindow::GameWindow() {
         return;
     }
 
-#ifndef USE_GLES
-    gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
-#else
+#ifdef USE_GLES
     gladLoadGLES2((GLADloadfunc)SDL_GL_GetProcAddress);
+#else
+    gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
 #endif
 
     loaded = true;
@@ -76,7 +85,9 @@ void GameWindow::run() {
         int width, height;
         SDL_GL_GetDrawableSize(window, &width, &height);
         glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.f, 0.f, 0.f, 0.f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
 
         for (auto callback : onRender) {
             callback(width, height);

@@ -57,6 +57,8 @@ target_sources(${PROJECT_NAME} PRIVATE
   images/heightmap.png
   shaders/render.vert
   shaders/render.frag
+  shaders/camera.vert
+  shaders/camera.frag
   shaders/heightmap.vert
   shaders/heightmap.frag
   src/core/gl.hpp
@@ -81,6 +83,8 @@ add_resource(res
   CSTR
     shaders/render.vert
     shaders/render.frag
+    shaders/camera.vert
+    shaders/camera.frag
     shaders/heightmap.vert
     shaders/heightmap.frag
   HEX
