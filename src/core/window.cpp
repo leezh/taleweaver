@@ -47,10 +47,13 @@ GameWindow::GameWindow() {
     }
 
 #ifdef USE_GLES
-    gladLoadGLES2((GLADloadfunc)SDL_GL_GetProcAddress);
+    int version = gladLoadGLES2((GLADloadfunc)SDL_GL_GetProcAddress);
 #else
-    gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
+    int version = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
 #endif
+    SDL_LogInfo(0, "%s", glGetString(GL_RENDERER));
+    SDL_LogInfo(0, "OpenGL %s", glGetString(GL_VERSION));
+    SDL_LogInfo(0, "GLSL %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     loaded = true;
 }
@@ -91,7 +94,7 @@ void GameWindow::run() {
         SDL_GL_GetDrawableSize(window, &width, &height);
         glViewport(0, 0, width, height);
         glClearColor(0.f, 0.f, 0.f, 0.f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
 
         for (auto callback : on_render) {

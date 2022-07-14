@@ -132,6 +132,7 @@ void CameraSystem::render(int screen_width, int screen_height) {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, screen_width, screen_height);
 
     glDisable(GL_DEPTH_TEST);
     glUseProgram(program);

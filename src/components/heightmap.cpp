@@ -187,6 +187,9 @@ HeightmapSystem::HeightmapSystem(unsigned int detail) {
     chunk_size = indices.size();
     stitch_size = chunk_size - stitch_offset;
 
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec3), &points[0], GL_STATIC_DRAW);
