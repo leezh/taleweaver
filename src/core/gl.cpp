@@ -4,9 +4,9 @@
 #include <SDL_log.h>
 
 #ifndef USE_GLES
-static const GLchar* shaderHeader = "#version 330 core\n";
+static const GLchar* shaderHeader = "#version 330 core\n#define highp\n#define mediump\n#define lowp\n";
 #else
-static const GLchar* shaderHeader = "#version 300 es\nprecision mediump float;\n";
+static const GLchar* shaderHeader = "#version 300 es\nprecision highp float;\n";
 #endif
 
 ShaderCompiler::ShaderCompiler() {
