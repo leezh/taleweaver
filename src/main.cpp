@@ -27,6 +27,12 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
 
     Heightmap map;
     {
+        const auto sea_bottom = glm::vec4(.1f, .7f, .8f, 1.f);
+        const auto sea_top = glm::vec4(.0f, .0f, .5f, 1.f);
+        const auto sand = glm::vec4(1.f, 1.f, .7f, 1.f);
+        const auto grass_bottom = glm::vec4(.3f, .5f, .2f, 1.f);
+        const auto grass_top = glm::vec4(.8f, 1.f, .8f, 1.f);
+        const auto snow = glm::vec4(1.f, 1.f, 1.f, 1.f);
         int cols, rows, n;
         stbi_uc *image = nullptr;
         image = stbi_load_from_memory(heightmap_data, sizeof(heightmap_data), &cols, &rows, &n, 1);
@@ -35,7 +41,19 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
             auto pixel = &image[0];
             for (int y = 0; y < rows; y++) {
                 for (int x = 0; x < cols; x++) {
-                    map.height(x, y) = (float)(*pixel++) / 255.f  * 200.f - 100.f;
+                    float height = (float)(*pixel++) - 100.f;
+                    glm::vec4 color;
+                    if (height > 80.f) {
+                        color = snow;
+                    } else if (height > 2.f) {
+                        color = glm::mix(grass_bottom, grass_top, height / 80.f);
+                    } else if (height > 0.f) {
+                        color = sand;
+                    } else {
+                        color = glm::mix(sea_bottom, sea_top, -height / 100.f);
+                    }
+                    map.set_height(x, y, height);
+                    map.set_color(x, y, color);
                 }
             }
             stbi_image_free(image);

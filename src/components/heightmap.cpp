@@ -23,8 +23,16 @@ Heightmap::~Heightmap() {
     }
 }
 
-float &Heightmap::height(int x, int y) {
-    return height_data[x + y * cols];
+void Heightmap::set_height(int x, int y, float value) {
+    height_data[x + y * cols] = value;
+}
+
+void Heightmap::set_color(int x, int y, glm::vec4 value) {
+    auto &pixel = color_data[x + y * cols];
+    pixel[0] = 255 * value.r;
+    pixel[1] = 255 * value.g;
+    pixel[2] = 255 * value.b;
+    pixel[3] = 255 * value.a;
 }
 
 int Heightmap::get_cols() {
@@ -175,6 +183,8 @@ void Heightmap::generate_textures() {
         glUseProgram(program);
         loc_position = glGetAttribLocation(program, "position");
         loc_height_texture = glGetUniformLocation(program, "height_texture");
+        loc_normal_texture = glGetUniformLocation(program, "normal_texture");
+        loc_color_texture = glGetUniformLocation(program, "color_texture");
         loc_xform = glGetUniformLocation(program, "xform");
         loc_scale = glGetUniformLocation(program, "scale");
         loc_tex_offset = glGetUniformLocation(program, "tex_offset");
@@ -203,17 +213,19 @@ void Heightmap::generate_textures() {
     glBindTexture(GL_TEXTURE_2D, normal_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG, cols, rows, 0, GL_RG, GL_UNSIGNED_BYTE, &normal_data[0]);
+    glGenerateMipmap(GL_TEXTURE_2D);
 
     glGenTextures(1, &color_texture);
     glBindTexture(GL_TEXTURE_2D, color_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, &color_data[0]);
+    glGenerateMipmap(GL_TEXTURE_2D);
 
     init_textures = true;
 }
@@ -244,6 +256,8 @@ void Heightmap::render(CameraSystem &viewport) {
     glBindTexture(GL_TEXTURE_2D, color_texture);
     glBindVertexArray(vao);
     glUniform1i(loc_height_texture, 0);
+    glUniform1i(loc_normal_texture, 1);
+    glUniform1i(loc_color_texture, 2);
     glUniform2f(loc_tex_Scale, tex_scale.x, tex_scale.y);
     glUniform2f(loc_tex_offset, tex_offset.x, tex_offset.y);
     glUniformMatrix4fv(loc_xform, 1, GL_FALSE, &xform[0][0]);
