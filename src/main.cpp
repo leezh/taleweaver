@@ -1,5 +1,6 @@
 #define GLM_FORCE_SWIZZLE
 #include <iostream>
+#include <stb_image.h>
 #include <entt/entt.hpp>
 #include "core/window.hpp"
 #include "components/heightmap.hpp"
@@ -24,19 +25,23 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
     auto camera = CameraSystem(registry);
     camera.set_active(registry.create());
 
-    HeightmapSystem mapRender;
     Heightmap map;
-    map.load_image_buffer(heightmap_data, sizeof(heightmap_data), -100.f, 100.f);
-
-    for (int x = 0; x < map.get_width(); x++) {
-        map.at(x, 0) = glm::vec3(0);
-        map.at(x, map.get_height() - 1) = glm::vec3(0);
+    {
+        int cols, rows, n;
+        stbi_uc *image = nullptr;
+        image = stbi_load_from_memory(heightmap_data, sizeof(heightmap_data), &cols, &rows, &n, 1);
+        if (image != nullptr) {
+            map.resize(cols, rows);
+            auto pixel = &image[0];
+            for (int y = 0; y < rows; y++) {
+                for (int x = 0; x < cols; x++) {
+                    map.height(x, y) = (float)(*pixel++) / 255.f  * 200.f - 100.f;
+                }
+            }
+            stbi_image_free(image);
+        }
+        map.generate_textures();
     }
-    for (int y = 0; y < map.get_height(); y++) {
-        map.at(0, y) = glm::vec3(0);
-        map.at(map.get_width() - 1, y) = glm::vec3(0);
-    }
-    map.upload();
 
     bool drag_enable = false;
     glm::vec2 drag_start;
@@ -88,7 +93,7 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
     });
 
     camera.on_render.emplace_back([&](int width, int height) {
-        mapRender.render(map, camera);
+        map.render(camera);
     });
 
     gameWindow.run();

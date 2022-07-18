@@ -1,6 +1,6 @@
 #pragma once
+#include <array>
 #include <vector>
-#include <glm/ext/vector_float3.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
 #include "core/gl.hpp"
 #include "core/window.hpp"
@@ -8,29 +8,22 @@
 
 class Heightmap {
     private:
-        std::vector<glm::vec3> data;
-        int width;
-        int height;
-        GLuint texture = 0;
+        std::vector<float> height_data;
+        std::vector<std::array<std::uint8_t, 2>> normal_data;
+        std::vector<std::array<std::uint8_t, 4>> color_data;
+        int cols;
+        int rows;
 
-    public:
-        ~Heightmap();
-        int get_width();
-        int get_height();
-        glm::vec3 &at(int x, int y);
-        void resize(int new_width, int new_height);
-        bool load_image_file(const char *path, float min, float max);
-        bool load_image_buffer(const unsigned char *buffer, int length, float min, float max);
-        void upload();
+        unsigned int detail = 7;
+        bool init_gl = false;
+        bool init_textures = false;
 
-        friend class HeightmapSystem;
-};
-
-class HeightmapSystem {
-    private:
+        GLuint height_texture;
+        GLuint normal_texture;
+        GLuint color_texture;
         GLuint program;
         GLint loc_position;
-        GLint loc_tex;
+        GLint loc_height_texture;
         GLint loc_xform;
         GLint loc_scale;
         GLint loc_tex_offset;
@@ -38,13 +31,17 @@ class HeightmapSystem {
         GLuint vao;
         GLuint vbo;
         GLuint ebo;
-        unsigned int chunk_length;
-        unsigned int chunk_size;
-        unsigned int stitch_size;
-        unsigned int stitch_offset;
+        GLuint chunk_size;
+        GLuint stitch_size;
+        GLuint stitch_offset;
 
     public:
-        HeightmapSystem(unsigned int detail = 7);
-        ~HeightmapSystem();
-        void render(const Heightmap& heightmap, CameraSystem &viewport);
+        ~Heightmap();
+        int get_cols();
+        int get_rows();
+        float &height(int x, int y);
+        void resize(int new_cols, int new_rows);
+        void generate_normals();
+        void generate_textures();
+        void render(CameraSystem &viewport);
 };
