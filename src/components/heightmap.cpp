@@ -23,16 +23,20 @@ Heightmap::~Heightmap() {
     }
 }
 
-void Heightmap::set_height(int x, int y, float value) {
-    height_data[x + y * cols] = value;
+float &Heightmap::height(int x, int y) {
+    return height_data[x + y * cols];
 }
 
-void Heightmap::set_color(int x, int y, glm::vec4 value) {
-    auto &pixel = color_data[x + y * cols];
-    pixel[0] = 255 * value.r;
-    pixel[1] = 255 * value.g;
-    pixel[2] = 255 * value.b;
-    pixel[3] = 255 * value.a;
+const float &Heightmap::height(int x, int y) const {
+    return height_data[x + y * cols];
+}
+
+glm::u8vec4 &Heightmap::color(int x, int y) {
+    return color_data[x + y * cols];
+}
+
+const glm::u8vec4 &Heightmap::color(int x, int y) const {
+    return color_data[x + y * cols];
 }
 
 int Heightmap::get_cols() {
@@ -46,12 +50,25 @@ int Heightmap::get_rows() {
 void Heightmap::resize(int new_cols, int new_rows) {
     cols = new_cols;
     rows = new_rows;
+
     height_data.resize(cols * rows);
     normal_data.resize(cols * rows);
     color_data.resize(cols * rows);
+
+    if (init_textures) {
+        glDeleteTextures(1, &height_texture);
+        glDeleteTextures(1, &normal_texture);
+        glDeleteTextures(1, &color_texture);
+        init_textures = false;
+    }
 }
 
 void Heightmap::generate_normals() {
+    for (int x = 0; x < cols; x++) {
+        for (int y = 0; y < rows; y++) {
+            //
+        }
+    }
 }
 
 void Heightmap::generate_textures() {

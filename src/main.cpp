@@ -11,7 +11,6 @@ static const unsigned char heightmap_data[] = {
 #include "images/heightmap.png.hex"
 };
 
-
 #ifndef USE_JNI
 int main(int argc, const char *argv[]) {
 #else
@@ -25,24 +24,27 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
     auto camera = CameraSystem(registry);
     camera.set_active(registry.create());
 
-    Heightmap map;
+    auto map = Heightmap();
+
     {
-        const auto sea_bottom = glm::vec4(.1f, .7f, .8f, 1.f);
-        const auto sea_top = glm::vec4(.0f, .0f, .5f, 1.f);
-        const auto sand = glm::vec4(1.f, 1.f, .7f, 1.f);
-        const auto grass_bottom = glm::vec4(.3f, .5f, .2f, 1.f);
-        const auto grass_top = glm::vec4(.8f, 1.f, .8f, 1.f);
-        const auto snow = glm::vec4(1.f, 1.f, 1.f, 1.f);
+        const auto sea_top = glm::u8vec4(16, 192, 224, 255);
+        const auto sea_bottom = glm::u8vec4(0, 0, 128, 255);
+        const auto sand = glm::u8vec4(255, 255, 192, 255);
+        const auto grass_bottom = glm::u8vec4(32, 128, 64, 255);
+        const auto grass_top = glm::u8vec4(192, 255, 192, 255);
+        const auto snow = glm::u8vec4(255, 255, 255, 255);
+
         int cols, rows, n;
         stbi_uc *image = nullptr;
         image = stbi_load_from_memory(heightmap_data, sizeof(heightmap_data), &cols, &rows, &n, 1);
         if (image != nullptr) {
             map.resize(cols, rows);
             auto pixel = &image[0];
-            for (int y = 0; y < rows; y++) {
-                for (int x = 0; x < cols; x++) {
-                    float height = (float)(*pixel++) - 100.f;
-                    glm::vec4 color;
+            for (int y = 0; y < map.get_rows(); y++) {
+                for (int x = 0; x < map.get_cols(); x++) {
+                    auto &height = map.height(x, y);
+                    auto &color = map.color(x, y);
+                    height = (float)(*pixel++) - 100.f;
                     if (height > 80.f) {
                         color = snow;
                     } else if (height > 2.f) {
@@ -50,10 +52,8 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
                     } else if (height > 0.f) {
                         color = sand;
                     } else {
-                        color = glm::mix(sea_bottom, sea_top, -height / 100.f);
+                        color = glm::mix(sea_top, sea_bottom, -height / 100.f);
                     }
-                    map.set_height(x, y, height);
-                    map.set_color(x, y, color);
                 }
             }
             stbi_image_free(image);
