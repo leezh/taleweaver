@@ -1,4 +1,4 @@
-in vec2 position;
+layout(location = 1) in vec2 position;
 
 out vec2 uv;
 out float height;

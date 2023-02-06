@@ -7,7 +7,7 @@
 #include "components/spatial.hpp"
 #include "components/camera.hpp"
 
-static const unsigned char heightmap_data[] = {
+const stbi_uc heightmap_data[] = {
 #include "images/heightmap.png.hex"
 };
 
@@ -20,13 +20,18 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
 #endif
     auto gameWindow = GameWindow();
     auto registry = entt::registry();
-
-    auto camera = CameraSystem(registry);
-    camera.set_active(registry.create());
-
-    auto map = Heightmap();
+    auto camera_system = CameraSystem(registry);
+    auto heightmap_system = HeightmapSystem(registry);
 
     {
+        auto entity = registry.create();
+        registry.emplace<Spatial>(entity);
+        registry.emplace<Camera>(entity);
+        camera_system.set_active(entity);
+    }
+
+    {
+        auto map = Heightmap();
         const auto sea_top = glm::u8vec4(16, 192, 224, 255);
         const auto sea_bottom = glm::u8vec4(0, 0, 128, 255);
         const auto sand = glm::u8vec4(255, 255, 192, 255);
@@ -35,8 +40,7 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
         const auto snow = glm::u8vec4(255, 255, 255, 255);
 
         int cols, rows, n;
-        stbi_uc *image = nullptr;
-        image = stbi_load_from_memory(heightmap_data, sizeof(heightmap_data), &cols, &rows, &n, 1);
+        auto *image = stbi_load_from_memory(heightmap_data, sizeof(heightmap_data), &cols, &rows, &n, 1);
         if (image != nullptr) {
             map.resize(cols, rows);
             auto pixel = &image[0];
@@ -58,7 +62,10 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
             }
             stbi_image_free(image);
         }
-        map.generate_textures();
+
+        auto entity = registry.create();
+        registry.emplace<Spatial>(entity);
+        registry.emplace<Heightmap>(entity, std::move(map));
     }
 
     bool drag_enable = false;
@@ -99,19 +106,19 @@ Java_net_leezh_taleweaver_MainActivity_nativeRunMain(JNIEnv* env, jclass clazz) 
         if (glm::length(input) > 1.f) input = glm::normalize(input);
         turn = glm::clamp(turn, -1.f, 1.f);
 
-        auto spatial = registry.get<Spatial>(camera.get_active());
+        auto spatial = registry.get<Spatial>(camera_system.get_active());
         input = glm::mat3(spatial.transform) * input;
         spatial.translate(input * delta * 50.f);
         spatial.rotate_y(glm::radians(turn * delta * 50.f));
-        registry.replace<Spatial>(camera.get_active(), spatial);
+        registry.replace<Spatial>(camera_system.get_active(), spatial);
     });
 
     gameWindow.on_render.emplace_back([&](int width, int height) {
-        camera.render(width, height);
+        camera_system.render(width, height);
     });
 
-    camera.on_render.emplace_back([&](int width, int height) {
-        map.render(camera);
+    camera_system.on_render.emplace_back([&](auto &view) {
+        heightmap_system.render(view);
     });
 
     gameWindow.run();

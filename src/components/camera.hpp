@@ -10,28 +10,32 @@ struct Camera {
     float fov = 45.f;
     float near = 0.01f;
     float far = 4000.f;
+
+    Camera() = default;
+    Camera(Camera &&camera) = default;
+    Camera(const Camera &camera) = default;
+    Camera& operator=(Camera &&camera) = default;
+    Camera& operator=(const Camera &camera) = default;
 };
 
 class CameraSystem {
     private:
         entt::registry &registry;
         entt::entity active_camera;
-        int width;
-        int height;
-        bool init_gl = false;
-        bool init_textures = false;
+        int width = 0;
+        int height = 0;
         GLuint depth_texture = 0;
         GLuint color_texture = 0;
-        GLuint program;
-        GLuint fbo;
-        GLuint vbo;
-        GLuint vao;
+        GLuint program = 0;
+        GLuint fbo = 0;
+        GLuint vbo = 0;
+        GLuint vao = 0;
         GLint loc_position;
         GLint loc_tex;
 
     public:
         float render_scale = 1.f;
-        std::list<std::function<void(int, int)>> on_render;
+        std::list<std::function<void(const glm::mat4 &)>> on_render;
 
         CameraSystem(entt::registry &registry);
         ~CameraSystem();
